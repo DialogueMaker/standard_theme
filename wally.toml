@@ -1,0 +1,22 @@
+[package]
+name = "dialoguemaker/standard-theme"
+version = "0.1.0-patch-1"
+registry = "https://github.com/UpliftGames/wally-index"
+realm = "shared"
+repository = "https://github.com/DialogueMaker/standard-theme"
+authors = ["Christian Toney <christian.toney@beastslash.com>"]
+include = ["src", "src/**/*.lua", "wally.toml", "default.project.json"]
+exclude = ["**"]
+
+[dependencies]
+dialogue-types = "dialoguemaker/dialogue-types@0.1.0-patch-2"
+effect-types = "dialoguemaker/effect-types@0.1.0-patch-3"
+react = "jsdotlua/react@17.2.1"
+theme-types = "dialoguemaker/theme-types@0.1.0-patch-1"
+use-continue-dialogue = "dialoguemaker/use-continue-dialogue@0.1.0-patch-1"
+use-dynamic-size = "dialoguemaker/use-dynamic-size@0.1.0-patch-1"
+use-keybind-continue = "dialoguemaker/use-keybind-continue@0.1.0-patch-1"
+use-maximum-distance = "dialoguemaker/use-maximum-distance@0.1.0-patch-1"
+use-pages = "dialoguemaker/use-pages@0.1.0-patch-1"
+use-responses = "dialoguemaker/use-responses@0.1.0-patch-1"
+use-typewriter = "dialoguemaker/use-typewriter@0.1.0-patch-2"
