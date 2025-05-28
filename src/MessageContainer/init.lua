@@ -3,7 +3,7 @@
 local package = script.Parent;
 
 local React = require(package.Parent.react);
-local IDialogue = require(package.Parent["dialogue-types"]);
+local IDialogue = require("@pkg/dialogue_types");
 local IEffect = require(package.Parent["effect-types"]);
 
 local MessageTextSegment = require(script.MessageTextSegment);

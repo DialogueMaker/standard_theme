@@ -5,7 +5,7 @@
 --
 -- Programmer: Christian Toney (Christian_Toney)
 
-local React = require(script.Parent.react);
+local React = require("@pkg/react");
 local ITheme = require(script.Parent["theme-types"]);
 
 local MessageContainer = require(script.MessageContainer);

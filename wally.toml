@@ -9,9 +9,6 @@ include = ["src", "src/**/*.lua", "wally.toml", "default.project.json"]
 exclude = ["**"]
 
 [dependencies]
-dialogue-types = "dialoguemaker/dialogue-types@0.1.0-patch-2"
-effect-types = "dialoguemaker/effect-types@0.1.0-patch-3"
-react = "jsdotlua/react@17.2.1"
 theme-types = "dialoguemaker/theme-types@0.1.0-patch-1"
 use-continue-dialogue = "dialoguemaker/use-continue-dialogue@0.1.0-patch-1"
 use-dynamic-size = "dialoguemaker/use-dynamic-size@0.1.0-patch-1"
