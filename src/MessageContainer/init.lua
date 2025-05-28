@@ -1,13 +1,11 @@
 --!strict
 
-local package = script.Parent;
-
-local React = require(package.Parent.react);
+local React = require("@pkg/react");
 local IDialogue = require("@pkg/dialogue_types");
-local IEffect = require(package.Parent["effect-types"]);
+local IEffect = require("@pkg/effect-types");
 
 local MessageTextSegment = require(script.MessageTextSegment);
-local usePages = require(package.Parent["use-pages"]);
+local usePages = require("@pkg/use_pages");
 
 type Page = IEffect.Page;
 type Dialogue = IDialogue.Dialogue;

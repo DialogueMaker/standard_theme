@@ -1,10 +1,9 @@
 --!strict
 
-local package = script.Parent.Parent;
-local React = require(package.Parent.react);
-local ITheme = require(package.Parent["theme-types"]);
+local React = require("@pkg/react");
+local ITheme = require("@pkg/theme_types");
 
-local useTypewriter = require(package.Parent["use-typewriter"]);
+local useTypewriter = require("@pkg/use_typewriter");
 
 type TextComponentProperties = ITheme.TextComponentProperties;
 

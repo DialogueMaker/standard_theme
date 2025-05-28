@@ -1,8 +1,7 @@
 --!strict
 
-local package = script.Parent;
-local React = require(package.Parent.react);
-local IDialogue = require(package.Parent["dialogue-types"]);
+local React = require("@pkg/react");
+local IDialogue = require("@pkg/dialogue_types");
 
 local ResponseButton = require(script.ResponseButton);
 

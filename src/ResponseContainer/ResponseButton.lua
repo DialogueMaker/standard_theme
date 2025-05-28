@@ -1,7 +1,6 @@
 --!strict
 
-local package = script.Parent.Parent;
-local React = require(package.Parent.react);
+local React = require("@pkg/react");
 
 export type ResponseProperties = {
   onClick: () -> ();

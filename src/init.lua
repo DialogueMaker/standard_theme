@@ -6,15 +6,15 @@
 -- Programmer: Christian Toney (Christian_Toney)
 
 local React = require("@pkg/react");
-local ITheme = require(script.Parent["theme-types"]);
+local ITheme = require("@pkg/theme_types");
 
 local MessageContainer = require(script.MessageContainer);
 local ResponseContainer = require(script.ResponseContainer);
-local useKeybindContinue = require(script.Parent["use-keybind-continue"]);
-local useMaximumDistance = require(script.Parent["use-maximum-distance"]);
-local useContinueDialogue = require(script.Parent["use-continue-dialogue"]);
-local useResponses = require(script.Parent["use-responses"]);
-local useDynamicSize = require(script.Parent["use-dynamic-size"]);
+local useKeybindContinue = require("@pkg/use_keybind_continue");
+local useMaximumDistance = require("@pkg/use_maximum_distance");
+local useContinueDialogue = require("@pkg/use_continue_dialogue");
+local useResponses = require("@pkg/use_responses");
+local useDynamicSize = require("@pkg/use_dynamic_size");
 
 type ThemeProperties = ITheme.ThemeProperties;
 
