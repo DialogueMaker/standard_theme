@@ -1,7 +1,8 @@
 --!strict
 
-local React = require("@pkg/react");
-local IDialogue = require("@pkg/dialogue_types");
+local packages = script.Parent.Parent.roblox_packages;
+local React = require(packages.react);
+local IDialogue = require(packages.dialogue_types);
 
 local ResponseButton = require(script.ResponseButton);
 

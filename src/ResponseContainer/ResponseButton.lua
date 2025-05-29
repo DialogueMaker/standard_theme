@@ -1,6 +1,7 @@
 --!strict
 
-local React = require("@pkg/react");
+local packages = script.Parent.Parent.Parent.roblox_packages;
+local React = require(packages.react);
 
 export type ResponseProperties = {
   onClick: () -> ();

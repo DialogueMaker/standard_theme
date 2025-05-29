@@ -1,9 +1,10 @@
 --!strict
 
-local React = require("@pkg/react");
-local ITheme = require("@pkg/theme_types");
+local packages = script.Parent.Parent.Parent.roblox_packages;
+local React = require(packages.react);
+local ITheme = require(packages.theme_types);
 
-local useTypewriter = require("@pkg/use_typewriter");
+local useTypewriter = require(packages.use_typewriter);
 
 type TextComponentProperties = ITheme.TextComponentProperties;
 

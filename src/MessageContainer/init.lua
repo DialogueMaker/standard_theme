@@ -1,11 +1,12 @@
 --!strict
 
-local React = require("@pkg/react");
-local IDialogue = require("@pkg/dialogue_types");
-local IEffect = require("@pkg/effect-types");
+local packages = script.Parent.Parent.roblox_packages;
+local React = require(packages.react);
+local IDialogue = require(packages.dialogue_types);
+local IEffect = require(packages.effect_types);
 
 local MessageTextSegment = require(script.MessageTextSegment);
-local usePages = require("@pkg/use_pages");
+local usePages = require(packages.use_pages);
 
 type Page = IEffect.Page;
 type Dialogue = IDialogue.Dialogue;
