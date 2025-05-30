@@ -100,7 +100,7 @@ local function MessageContainer(props: MessageContainerProperties)
             skipPageSignal = if skipPageEvent then skipPageEvent.Event else nil;
             layoutOrder = index;
             textSize = 14;
-            key = `{currentPageIndex}.{index}`;
+            key = `{props.dialogue.moduleScript:GetFullName()}.{currentPageIndex}.{index}`;
             letterDelay = if shouldSkip then 0 else dialogueSettings.typewriter.characterDelaySeconds;
             onComplete = onComplete;
           });
@@ -119,7 +119,7 @@ local function MessageContainer(props: MessageContainerProperties)
               letterDelay = if shouldSkip then 0 else dialogueSettings.typewriter.characterDelaySeconds;
               textSize = 14;
             };
-            key = `{currentPageIndex}.{index}`;
+            key = `{props.dialogue.moduleScript:GetFullName()}.{currentPageIndex}.{index}`;
           });
 
           if possibleComponent then
