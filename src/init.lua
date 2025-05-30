@@ -24,11 +24,11 @@ local skipPageEvent = Instance.new("BindableEvent");
 local function StandardTheme(props: ThemeProperties)
 
   local npc = props.npc;
-  local dialogueClient = props.dialogueClient;
-  local dialogueServer = props.dialogueServer;
-  local dialogueServerSettings = dialogueServer:getSettings();
+  local client = props.client;
+  local conversation = props.conversation;
+  local conversationSettings = conversation:getSettings();
   local dialogueSettings = props.dialogue:getSettings();
-  local npcName = dialogueServerSettings.general.name;
+  local npcName = conversationSettings.general.name;
 
   local clickSoundRef = React.useRef(nil :: Sound?);
 
@@ -65,8 +65,8 @@ local function StandardTheme(props: ThemeProperties)
     isNPCTalking = not isTypingFinished;
     hasResponses = #responses > 0;
   });
-  useKeybindContinue(dialogueClient, continueDialogue);
-  useMaximumDistance(npc, dialogueServer, props.onTimeout);
+  useKeybindContinue(client, continueDialogue);
+  useMaximumDistance(npc, conversation, props.onTimeout);
 
   -- TODO: Implement timeout.
   
