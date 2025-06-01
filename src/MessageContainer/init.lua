@@ -54,14 +54,14 @@ local function MessageContainer(props: MessageContainerProperties)
 
     end;
 
-  end, {pages :: unknown, skipPageEvent});
+  end, {pages :: unknown, skipPageEvent, currentPageIndex});
 
   React.useEffect(function(): ()
 
     props.setIsTypingFinished(false);
     setComponentIndex(1);
 
-  end, {pages :: any, currentPageIndex});
+  end, {pages :: unknown, currentPageIndex});
     
   local messageComponentList = {};
 
