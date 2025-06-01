@@ -59,6 +59,7 @@ local function MessageContainer(props: MessageContainerProperties)
   React.useEffect(function(): ()
 
     props.setIsTypingFinished(false);
+    setComponentIndex(1);
 
   end, {pages :: any, currentPageIndex});
     
