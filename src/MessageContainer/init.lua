@@ -6,6 +6,7 @@ local IDialogue = require(packages.dialogue_types);
 local IEffect = require(packages.effect_types);
 local ITheme = require(packages.theme_types);
 
+local ContinueIndicator = require(script.ContinueIndicator);
 local ContentContainer = require(script.ContentContainer);
 local useKeybindContinue = require(packages.use_keybind_continue);
 local useContinueDialogue = require(packages.use_continue_dialogue);
@@ -84,6 +85,9 @@ local function MessageContainer(properties: MessageContainerProperties)
       dialogueSettings = properties.dialogueSettings;
       textSize = properties.textSize;
     });
+    ContinueIndicator = if properties.isTypingFinished and properties.currentPageIndex < #properties.pages then
+      React.createElement(ContinueIndicator)
+    else nil;
   });
 
 end;
