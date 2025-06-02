@@ -11,125 +11,116 @@ local ITheme = require(packages.theme_types);
 
 local MessageContainer = require(script.MessageContainer);
 local ResponseContainer = require(script.ResponseContainer);
-local useKeybindContinue = require(packages.use_keybind_continue);
 local useMaximumDistance = require(packages.use_maximum_distance);
-local useContinueDialogue = require(packages.use_continue_dialogue);
 local useResponses = require(packages.use_responses);
 local useDynamicSize = require(packages.use_dynamic_size);
+local usePages = require(packages.use_pages);
 
 type ThemeProperties = ITheme.ThemeProperties;
 
 local skipPageEvent = Instance.new("BindableEvent");
 
-local function StandardTheme(props: ThemeProperties)
+local function StandardTheme(properties: ThemeProperties)
 
-  local npc = props.npc;
-  local client = props.client;
-  local conversation = props.conversation;
-  local conversationSettings = conversation:getSettings();
-  local dialogueSettings = props.dialogue:getSettings();
-  local npcName = conversationSettings.general.name;
+  local npc = properties.npc;
+  local conversation = properties.conversation;
+  local textSize = 20;
+  local lineHeight = 1.25;
+  local sizes = React.useMemo(function()
 
-  local clickSoundRef = React.useRef(nil :: Sound?);
+    return {
+      {
+        width = 500;
+      },
+      {
+        width = 310;
+      }
+    };
 
+  end, {});
   local dynamicSizeIndex = useDynamicSize({
     {
       minimumWidth = 736;
     }
   });
-  local sizes = {
-    {
-      width = 500;
-    },
-    {
-      width = 310;
-    }
-  };
   local size = sizes[dynamicSizeIndex or #sizes];
-
-  -- States
   local currentPageIndex, setCurrentPageIndex = React.useState(1);
+  local dialogueSettings, dialogueContent = React.useMemo(function()
+    
+    return properties.dialogue:getSettings(), properties.dialogue:getContent();
 
-  -- Hooks
-  local pages, setPages = React.useState({});
-  local responses = useResponses(props.dialogue);
+  end, {properties.dialogue});
+  local messageContainerHeight = 75;
+  local messageContainerPadding = 15;
+  local pageFittingProperties = React.useMemo(function()
+
+    return {
+      containerSize = UDim2.new(0, size.width - (2 * messageContainerPadding) - 30, 0, messageContainerHeight - (2 * messageContainerPadding));
+      fontFace = Font.fromName("BuilderSans", Enum.FontWeight.Regular);
+      textSize = textSize;
+      lineHeight = lineHeight;
+    };
+
+  end, {size :: unknown, textSize, lineHeight});
+  local pages = usePages(dialogueContent, pageFittingProperties);
+
+  React.useEffect(function()
+
+    setCurrentPageIndex(1);
+
+  end, {pages :: unknown});
+
+  local responses = useResponses(properties.dialogue);
   local isTypingFinished, setIsTypingFinished = React.useState(false);
-  local continueDialogue = useContinueDialogue({
-    pages = pages;
-    clickSoundRef = clickSoundRef;
-    allowPlayerToSkipDelay = dialogueSettings.typewriter.canPlayerSkipDelay;
-    currentPageIndex = currentPageIndex;
-    setCurrentPageIndex = setCurrentPageIndex;
-    onComplete = props.onComplete;
-    skipPageEvent = skipPageEvent;
-    isNPCTalking = not isTypingFinished;
-    hasResponses = #responses > 0;
-  });
-  useKeybindContinue(client, continueDialogue);
-  useMaximumDistance(npc, conversation, props.onTimeout);
-
-  -- TODO: Implement timeout.
+  useMaximumDistance(npc, conversation, properties.onTimeout);
   
+  React.useEffect(function()
+  
+    setIsTypingFinished(false);
+
+  end, {pages :: unknown, currentPageIndex});
+
   return React.createElement("Frame", {
     AnchorPoint = Vector2.new(0.5, 1);
     Position = UDim2.new(0.5, 0, 1, -15);
     AutomaticSize = Enum.AutomaticSize.Y;
     Size = UDim2.fromOffset(size.width, 0);
     BackgroundTransparency = 1;
-    [React.Event.InputBegan] = function(self: Frame, input: InputObject)
-
-      if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
-
-        continueDialogue();
-
-      end;
-
-    end;
   }, {
     UIListLayout = React.createElement("UIListLayout", {
       SortOrder = Enum.SortOrder.LayoutOrder;
       Padding = UDim.new(0, 5);
       FillDirection = Enum.FillDirection.Vertical;
     });
-    NPCNameTextLabel = if npcName then React.createElement("TextLabel", {
-      AutomaticSize = Enum.AutomaticSize.XY;
-      Text = npcName;
-      LayoutOrder = 1;
-    }) else nil;
     MessageContainer = React.createElement(MessageContainer, {
-      pages = pages, 
+      dialogue = properties.dialogue;
+      pages = pages;
       currentPageIndex = currentPageIndex; 
       skipPageEvent = skipPageEvent;
-      continueDialogue = continueDialogue;
-      onPagesUpdated = setPages;
-      dialogue = props.dialogue;
-      setIsTypingFinished = setIsTypingFinished;
+      themeProperties = properties;
+      responses = responses;
+      isTypingFinished = isTypingFinished;
+      themeWidth = size.width;
+      lineHeight = lineHeight;
+      dialogueSettings = dialogueSettings;
+      textSize = textSize;
+      height = messageContainerHeight;
+      padding = messageContainerPadding;
+      onTypingFinished = function()
+
+        setIsTypingFinished(true);
+
+      end;
       setCurrentPageIndex = setCurrentPageIndex;
     });
     ResponseContainer = if #responses > 0 and (not dialogueSettings.typewriter.shouldShowResponseWhileTyping or isTypingFinished) then React.createElement(ResponseContainer, {
       responses = responses;
       onComplete = function(newParent)
 
-        props.onComplete(newParent);
+        properties.onComplete(newParent);
 
       end;
     }) else nil;
-    -- ContinueButton = React.createElement("ImageButton", {
-    --   Size = UDim2.new(0, 20, 0, 20);
-    --   LayoutOrder = 3;
-    --   Image = "rbxassetid://90966430453504";
-    --   BackgroundColor3 = if isNPCTalking and not npcSettings.general.allowPlayerToSkipDelay then Color3.new(0.705882, 0.705882, 0.705882) else Color3.new(1, 1, 1);
-    --   ImageColor3 = if isNPCTalking and not npcSettings.general.allowPlayerToSkipDelay then Color3.new(0.486275, 0.486275, 0.486275) else Color3.new(1, 1, 1);
-    --   [React.Event.Activated] = if isNPCTalking and not npcSettings.general.allowPlayerToSkipDelay then nil else function()
-
-    --     continueDialogue()
-
-    --   end;
-    -- });
-    -- ClickSound = if clientSettings.defaultClickSound then React.createElement("Sound", {
-    --   SoundId = `rbxassetid://{clientSettings.defaultClickSound}`;
-    --   ref = clickSoundRef;
-    -- }) else nil;
   })
 
 end;

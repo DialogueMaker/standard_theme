@@ -2,7 +2,7 @@
 # It is not intended for manual editing.
 format = 2
 name = "dialoguemaker/standard_theme"
-version = "0.1.0-patch-5"
+version = "0.1.0-patch-6"
 target = "roblox"
 
 [graph."0x5eal/unzip@0.1.3 luau".pkg_ref]
@@ -50,16 +50,19 @@ react = [{ wally = "wally#jsdotlua/react", version = "^17.2.1", index = "https:/
 rojo = [{ name = "pesde/rojo", version = "^7.4.4", index = "https://github.com/pesde-pkg/index", target = "lune" }, "dev"]
 scripts = [{ name = "pesde/scripts_rojo", version = "^0.1.0", index = "https://github.com/pesde-pkg/index", target = "lune" }, "dev"]
 
-[graph."dialoguemaker/dialogue_content_fitter@0.1.0-patch-2 roblox".dependencies]
+[graph."dialoguemaker/dialogue_content_fitter@0.1.0-patch-5 roblox"]
+direct = ["dialogue_content_fitter", { name = "dialoguemaker/dialogue_content_fitter", version = "^0.1.0-patch-5", index = "default" }, "standard"]
+
+[graph."dialoguemaker/dialogue_content_fitter@0.1.0-patch-5 roblox".dependencies]
 dialogue_content_fitter_types = ["dialoguemaker/dialogue_content_fitter_types@0.1.0-patch-2 roblox", "standard"]
 effect_types = ["dialoguemaker/effect_types@0.1.0-patch-9 roblox", "standard"]
 react = ["wally#jsdotlua/react@17.2.1 roblox", "peer"]
 
-[graph."dialoguemaker/dialogue_content_fitter@0.1.0-patch-2 roblox".pkg_ref]
+[graph."dialoguemaker/dialogue_content_fitter@0.1.0-patch-5 roblox".pkg_ref]
 ref_ty = "pesde"
 index_url = "https://github.com/pesde-pkg/index"
 
-[graph."dialoguemaker/dialogue_content_fitter@0.1.0-patch-2 roblox".pkg_ref.dependencies]
+[graph."dialoguemaker/dialogue_content_fitter@0.1.0-patch-5 roblox".pkg_ref.dependencies]
 dialogue_content_fitter_types = [{ name = "dialoguemaker/dialogue_content_fitter_types", version = "^0.1.0-patch-2", index = "https://github.com/pesde-pkg/index" }, "standard"]
 effect_types = [{ name = "dialoguemaker/effect_types", version = "^0.1.0-patch-9", index = "https://github.com/pesde-pkg/index" }, "standard"]
 luau_lsp = [{ name = "pesde/luau_lsp", version = "^1.47.0", index = "https://github.com/pesde-pkg/index", target = "lune" }, "dev"]
@@ -116,9 +119,6 @@ react = [{ wally = "wally#jsdotlua/react", version = "^17.2.1", index = "https:/
 rojo = [{ name = "pesde/rojo", version = "^7.4.4", index = "https://github.com/pesde-pkg/index", target = "lune" }, "dev"]
 scripts = [{ name = "pesde/scripts_rojo", version = "^0.1.0", index = "https://github.com/pesde-pkg/index", target = "lune" }, "dev"]
 
-[graph."dialoguemaker/theme_types@0.1.0-patch-6 roblox"]
-direct = ["theme_types", { name = "dialoguemaker/theme_types", version = "^0.1.0-patch-6", index = "default" }, "standard"]
-
 [graph."dialoguemaker/theme_types@0.1.0-patch-6 roblox".dependencies]
 client_types = ["dialoguemaker/client_types@0.1.0-patch-1 roblox", "standard"]
 conversation_types = ["dialoguemaker/conversation_types@0.1.0-patch-2 roblox", "standard"]
@@ -138,18 +138,40 @@ react = [{ wally = "wally#jsdotlua/react", version = "^17.2.1", index = "https:/
 rojo = [{ name = "pesde/rojo", version = "^7.4.4", index = "https://github.com/pesde-pkg/index", target = "lune" }, "dev"]
 scripts = [{ name = "pesde/scripts_rojo", version = "^0.1.0", index = "https://github.com/pesde-pkg/index", target = "lune" }, "dev"]
 
-[graph."dialoguemaker/use_continue_dialogue@0.1.0-patch-4 roblox"]
-direct = ["use_continue_dialogue", { name = "dialoguemaker/use_continue_dialogue", version = "^0.1.0-patch-4", index = "default" }, "standard"]
+[graph."dialoguemaker/theme_types@0.1.0-patch-8 roblox"]
+direct = ["theme_types", { name = "dialoguemaker/theme_types", version = "^0.1.0-patch-8", index = "default" }, "standard"]
 
-[graph."dialoguemaker/use_continue_dialogue@0.1.0-patch-4 roblox".dependencies]
-effect_types = ["dialoguemaker/effect_types@0.1.0-patch-9 roblox", "standard"]
+[graph."dialoguemaker/theme_types@0.1.0-patch-8 roblox".dependencies]
+client_types = ["dialoguemaker/client_types@0.1.0-patch-1 roblox", "standard"]
+conversation_types = ["dialoguemaker/conversation_types@0.1.0-patch-2 roblox", "standard"]
+dialogue_types = ["dialoguemaker/dialogue_types@0.1.0-patch-7 roblox", "standard"]
 react = ["wally#jsdotlua/react@17.2.1 roblox", "peer"]
 
-[graph."dialoguemaker/use_continue_dialogue@0.1.0-patch-4 roblox".pkg_ref]
+[graph."dialoguemaker/theme_types@0.1.0-patch-8 roblox".pkg_ref]
 ref_ty = "pesde"
 index_url = "https://github.com/pesde-pkg/index"
 
-[graph."dialoguemaker/use_continue_dialogue@0.1.0-patch-4 roblox".pkg_ref.dependencies]
+[graph."dialoguemaker/theme_types@0.1.0-patch-8 roblox".pkg_ref.dependencies]
+client_types = [{ name = "dialoguemaker/client_types", version = "^0.1.0-patch-1", index = "https://github.com/pesde-pkg/index" }, "standard"]
+conversation_types = [{ name = "dialoguemaker/conversation_types", version = "^0.1.0-patch-2", index = "https://github.com/pesde-pkg/index" }, "standard"]
+dialogue_types = [{ name = "dialoguemaker/dialogue_types", version = "^0.1.0-patch-7", index = "https://github.com/pesde-pkg/index" }, "standard"]
+luau_lsp = [{ name = "pesde/luau_lsp", version = "^1.47.0", index = "https://github.com/pesde-pkg/index", target = "lune" }, "dev"]
+react = [{ wally = "wally#jsdotlua/react", version = "^17.2.1", index = "https://github.com/UpliftGames/wally-index" }, "peer"]
+rojo = [{ name = "pesde/rojo", version = "^7.4.4", index = "https://github.com/pesde-pkg/index", target = "lune" }, "dev"]
+scripts = [{ name = "pesde/scripts_rojo", version = "^0.1.0", index = "https://github.com/pesde-pkg/index", target = "lune" }, "dev"]
+
+[graph."dialoguemaker/use_continue_dialogue@0.1.0-patch-5 roblox"]
+direct = ["use_continue_dialogue", { name = "dialoguemaker/use_continue_dialogue", version = "^0.1.0-patch-5", index = "default" }, "standard"]
+
+[graph."dialoguemaker/use_continue_dialogue@0.1.0-patch-5 roblox".dependencies]
+effect_types = ["dialoguemaker/effect_types@0.1.0-patch-9 roblox", "standard"]
+react = ["wally#jsdotlua/react@17.2.1 roblox", "peer"]
+
+[graph."dialoguemaker/use_continue_dialogue@0.1.0-patch-5 roblox".pkg_ref]
+ref_ty = "pesde"
+index_url = "https://github.com/pesde-pkg/index"
+
+[graph."dialoguemaker/use_continue_dialogue@0.1.0-patch-5 roblox".pkg_ref.dependencies]
 effect_types = [{ name = "dialoguemaker/effect_types", version = "^0.1.0-patch-9", index = "https://github.com/pesde-pkg/index" }, "standard"]
 luau_lsp = [{ name = "pesde/luau_lsp", version = "^1.47.0", index = "https://github.com/pesde-pkg/index", target = "lune" }, "dev"]
 react = [{ wally = "wally#jsdotlua/react", version = "^17.2.1", index = "https://github.com/UpliftGames/wally-index" }, "peer"]
@@ -209,23 +231,22 @@ react = [{ wally = "wally#jsdotlua/react", version = "^17.2.1", index = "https:/
 rojo = [{ name = "pesde/rojo", version = "^7.4.4", index = "https://github.com/pesde-pkg/index", target = "lune" }, "dev"]
 scripts = [{ name = "pesde/scripts_rojo", version = "^0.1.0", index = "https://github.com/pesde-pkg/index", target = "lune" }, "dev"]
 
-[graph."dialoguemaker/use_pages@0.1.0-patch-4 roblox"]
-direct = ["use_pages", { name = "dialoguemaker/use_pages", version = "^0.1.0-patch-4", index = "default" }, "standard"]
+[graph."dialoguemaker/use_pages@0.1.0-patch-7 roblox"]
+direct = ["use_pages", { name = "dialoguemaker/use_pages", version = "^0.1.0-patch-7", index = "default" }, "standard"]
 
-[graph."dialoguemaker/use_pages@0.1.0-patch-4 roblox".dependencies]
-dialogue_content_fitter = ["dialoguemaker/dialogue_content_fitter@0.1.0-patch-2 roblox", "standard"]
+[graph."dialoguemaker/use_pages@0.1.0-patch-7 roblox".dependencies]
+dialogue_content_fitter = ["dialoguemaker/dialogue_content_fitter@0.1.0-patch-5 roblox", "standard"]
 dialogue_types = ["dialoguemaker/dialogue_types@0.1.0-patch-7 roblox", "standard"]
 effect_types = ["dialoguemaker/effect_types@0.1.0-patch-9 roblox", "standard"]
 react = ["wally#jsdotlua/react@17.2.1 roblox", "peer"]
 theme_types = ["dialoguemaker/theme_types@0.1.0-patch-6 roblox", "standard"]
 
-[graph."dialoguemaker/use_pages@0.1.0-patch-4 roblox".pkg_ref]
+[graph."dialoguemaker/use_pages@0.1.0-patch-7 roblox".pkg_ref]
 ref_ty = "pesde"
 index_url = "https://github.com/pesde-pkg/index"
 
-[graph."dialoguemaker/use_pages@0.1.0-patch-4 roblox".pkg_ref.dependencies]
-darklua = [{ name = "pesde/darklua", version = "^0.16.0", index = "https://github.com/pesde-pkg/index", target = "lune" }, "dev"]
-dialogue_content_fitter = [{ name = "dialoguemaker/dialogue_content_fitter", version = "^0.1.0-patch-2", index = "https://github.com/pesde-pkg/index" }, "standard"]
+[graph."dialoguemaker/use_pages@0.1.0-patch-7 roblox".pkg_ref.dependencies]
+dialogue_content_fitter = [{ name = "dialoguemaker/dialogue_content_fitter", version = "^0.1.0-patch-5", index = "https://github.com/pesde-pkg/index" }, "standard"]
 dialogue_types = [{ name = "dialoguemaker/dialogue_types", version = "^0.1.0-patch-7", index = "https://github.com/pesde-pkg/index" }, "standard"]
 effect_types = [{ name = "dialoguemaker/effect_types", version = "^0.1.0-patch-9", index = "https://github.com/pesde-pkg/index" }, "standard"]
 luau_lsp = [{ name = "pesde/luau_lsp", version = "^1.47.0", index = "https://github.com/pesde-pkg/index", target = "lune" }, "dev"]
