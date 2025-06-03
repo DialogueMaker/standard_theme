@@ -2,12 +2,12 @@
 
 local packages = script.Parent.Parent.Parent.Parent.roblox_packages;
 local React = require(packages.react);
-local ITheme = require(packages.theme_types);
+local DialogueMakerTypes = require(packages.dialogue_maker_types);
 local DialogueContentFitter = require(packages.dialogue_content_fitter);
 
 local useTypewriter = require(packages.use_typewriter);
 
-type TextComponentProperties = ITheme.TextComponentProperties;
+type TextComponentProperties = DialogueMakerTypes.TextComponentProperties;
 
 local function TextSegment(properties: TextComponentProperties)
 

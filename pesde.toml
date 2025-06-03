@@ -39,14 +39,10 @@ luau_lsp = { name = "pesde/luau_lsp", version = "^1.47.0", target = "lune" }
 react = { wally = "jsdotlua/react", version = "^17.2.1" }
 
 [dependencies]
-theme_types = { name = "dialoguemaker/theme_types", version = "^0.1.0-patch-8" }
-effect_types = { name = "dialoguemaker/effect_types", version = "^0.1.0-patch-9" }
-use_continue_dialogue = { name = "dialoguemaker/use_continue_dialogue", version = "^0.1.0-patch-5" }
 use_dynamic_size = { name = "dialoguemaker/use_dynamic_size", version = "^0.1.0-patch-2" }
-use_keybind_continue = { name = "dialoguemaker/use_keybind_continue", version = "^0.1.0-patch-3" }
-use_maximum_distance = { name = "dialoguemaker/use_maximum_distance", version = "^0.1.0-patch-3" }
-use_pages = { name = "dialoguemaker/use_pages", version = "^0.1.0-patch-7" }
-use_responses = { name = "dialoguemaker/use_responses", version = "^0.1.0-patch-2" }
-use_typewriter = { name = "dialoguemaker/use_typewriter", version = "^0.1.0-patch-2" }
-dialogue_types = { name = "dialoguemaker/dialogue_types", version = "^0.1.0-patch-7" }
-dialogue_content_fitter = { name = "dialoguemaker/dialogue_content_fitter", version = "^0.1.0-patch-5" }
+use_keybind_continue = { name = "dialoguemaker/use_keybind_continue", version = "^0.1.0" }
+use_pages = { name = "dialoguemaker/use_pages", version = "^0.1.0" }
+use_responses = { name = "dialoguemaker/use_responses", version = "^0.1.1" }
+use_typewriter = { name = "dialoguemaker/use_typewriter", version = "^0.1.0" }
+dialogue_content_fitter = { name = "dialoguemaker/dialogue_content_fitter", version = "^0.1.0" }
+dialogue_maker_types = { name = "dialoguemaker/types", version = "^0.1.3" }

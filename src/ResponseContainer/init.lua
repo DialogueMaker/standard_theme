@@ -2,11 +2,11 @@
 
 local packages = script.Parent.Parent.roblox_packages;
 local React = require(packages.react);
-local IDialogue = require(packages.dialogue_types);
+local DialogueMakerTypes = require(packages.dialogue_maker_types);
 
 local ResponseButton = require(script.ResponseButton);
 
-type Dialogue = IDialogue.Dialogue;
+type Dialogue = DialogueMakerTypes.Dialogue;
 
 export type ResponseComponentListProperties = {
   responses: {Dialogue};

@@ -2,14 +2,13 @@
 
 local packages = script.Parent.Parent.Parent.roblox_packages;
 local React = require(packages.react);
+local DialogueMakerTypes = require(packages.dialogue_maker_types);
+
 local MessageTextSegment = require(script.MessageTextSegment);
 
-local IDialogue = require(packages.dialogue_types);
-local IEffect = require(packages.effect_types);
-
-type Dialogue = IDialogue.Dialogue;
-type DialogueSettings = IDialogue.DialogueSettings;
-type Page = IEffect.Page;
+type Dialogue = DialogueMakerTypes.Dialogue;
+type DialogueSettings = DialogueMakerTypes.DialogueSettings;
+type Page = DialogueMakerTypes.Page;
 
 export type ContentContainerProperties = {
   dialogue: Dialogue;

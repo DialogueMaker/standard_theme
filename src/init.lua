@@ -7,23 +7,20 @@
 
 local packages = script.Parent.roblox_packages;
 local React = require(packages.react);
-local ITheme = require(packages.theme_types);
+local DialogueMakerTypes = require(packages.dialogue_maker_types);
 
 local MessageContainer = require(script.MessageContainer);
 local ResponseContainer = require(script.ResponseContainer);
-local useMaximumDistance = require(packages.use_maximum_distance);
 local useResponses = require(packages.use_responses);
 local useDynamicSize = require(packages.use_dynamic_size);
 local usePages = require(packages.use_pages);
 
-type ThemeProperties = ITheme.ThemeProperties;
+type ThemeProperties = DialogueMakerTypes.ThemeProperties;
 
 local skipPageEvent = Instance.new("BindableEvent");
 
 local function StandardTheme(properties: ThemeProperties)
 
-  local npc = properties.npc;
-  local conversation = properties.conversation;
   local textSize = 20;
   local lineHeight = 1.25;
   local sizes = React.useMemo(function()
@@ -63,6 +60,24 @@ local function StandardTheme(properties: ThemeProperties)
 
   end, {size :: unknown, textSize, lineHeight});
   local pages = usePages(dialogueContent, pageFittingProperties);
+  local didRunInitializationAction, setDidRunInitializationAction = React.useState(false);
+
+  React.useEffect(function()
+  
+    if properties.dialogue then
+
+      properties.dialogue:runInitializationAction(properties.client);
+      setDidRunInitializationAction(true);
+
+    end;
+
+    return function()
+
+      setDidRunInitializationAction(false);
+
+    end;
+
+  end, {properties.dialogue});
 
   React.useEffect(function()
 
@@ -72,7 +87,6 @@ local function StandardTheme(properties: ThemeProperties)
 
   local responses = useResponses(properties.dialogue);
   local isTypingFinished, setIsTypingFinished = React.useState(false);
-  useMaximumDistance(npc, conversation, properties.onTimeout);
   
   React.useEffect(function()
   
@@ -80,7 +94,7 @@ local function StandardTheme(properties: ThemeProperties)
 
   end, {pages :: unknown, currentPageIndex});
 
-  return React.createElement("Frame", {
+  return if not didRunInitializationAction then React.createElement("Frame", {
     AnchorPoint = Vector2.new(0.5, 1);
     Position = UDim2.new(0.5, 0, 1, -15);
     AutomaticSize = Enum.AutomaticSize.Y;
@@ -98,7 +112,6 @@ local function StandardTheme(properties: ThemeProperties)
       currentPageIndex = currentPageIndex; 
       skipPageEvent = skipPageEvent;
       themeProperties = properties;
-      responses = responses;
       isTypingFinished = isTypingFinished;
       themeWidth = size.width;
       lineHeight = lineHeight;
@@ -111,17 +124,30 @@ local function StandardTheme(properties: ThemeProperties)
         setIsTypingFinished(true);
 
       end;
+      onPageFinished = function()
+
+        if #pages > currentPageIndex then
+          
+          setCurrentPageIndex(currentPageIndex + 1);
+        
+        elseif #responses == 0 then
+
+          properties.dialogue:runCompletionAction(properties.client);
+
+        end;
+
+      end;
       setCurrentPageIndex = setCurrentPageIndex;
     });
     ResponseContainer = if #responses > 0 and (not dialogueSettings.typewriter.shouldShowResponseWhileTyping or isTypingFinished) then React.createElement(ResponseContainer, {
       responses = responses;
-      onComplete = function(newParent)
+      onComplete = function(requestedDialogue)
 
-        properties.onComplete(newParent);
+        properties.dialogue:runCompletionAction(properties.client, requestedDialogue);
 
       end;
     }) else nil;
-  })
+  }) else nil;
 
 end;
 

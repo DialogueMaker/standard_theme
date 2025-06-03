@@ -2,29 +2,25 @@
 
 local packages = script.Parent.Parent.roblox_packages;
 local React = require(packages.react);
-local IDialogue = require(packages.dialogue_types);
-local IEffect = require(packages.effect_types);
-local ITheme = require(packages.theme_types);
+local DialogueMakerTypes = require(packages.dialogue_maker_types);
 
 local ContinueIndicator = require(script.ContinueIndicator);
 local ContentContainer = require(script.ContentContainer);
 local useKeybindContinue = require(packages.use_keybind_continue);
-local useContinueDialogue = require(packages.use_continue_dialogue);
 
-type Page = IEffect.Page;
-type Dialogue = IDialogue.Dialogue;
-type ThemeProperties = ITheme.ThemeProperties;
-type DialogueSettings = IDialogue.DialogueSettings;
+type Page = DialogueMakerTypes.Page;
+type Dialogue = DialogueMakerTypes.Dialogue;
+type ThemeProperties = DialogueMakerTypes.ThemeProperties;
+type DialogueSettings = DialogueMakerTypes.DialogueSettings;
 
 export type MessageContainerProperties = {
   dialogue: Dialogue;
   currentPageIndex: number;
   skipPageEvent: BindableEvent;
-  setCurrentPageIndex: (number) -> ();
+  onPageFinished: () -> ();
   onTypingFinished: () -> ();
   isTypingFinished: boolean;
   themeProperties: ThemeProperties;
-  responses: {Dialogue};
   themeWidth: number;
   pages: {Page};
   dialogueSettings: DialogueSettings;
@@ -38,17 +34,36 @@ local function MessageContainer(properties: MessageContainerProperties)
 
   local currentPageIndex = properties.currentPageIndex;
   local skipPageEvent = properties.skipPageEvent;
+  local isTypingFinished = properties.isTypingFinished;
+  local onPageFinished = properties.onPageFinished;
 
-  local continueDialogue = useContinueDialogue({
-    pages = properties.pages;
-    allowPlayerToSkipDelay = properties.dialogueSettings.typewriter.canPlayerSkipDelay;
-    currentPageIndex = currentPageIndex;
-    setCurrentPageIndex = properties.setCurrentPageIndex;
-    onComplete = properties.themeProperties.onComplete;
-    skipPageEvent = skipPageEvent;
-    isNPCTalking = not properties.isTypingFinished;
-    hasResponses = #properties.responses > 0;
-  });
+  local canPlayerSkipDelay = properties.dialogueSettings.typewriter.canPlayerSkipDelay;
+  local continueDialogue = React.useCallback(function()
+
+    if isTypingFinished then
+
+      onPageFinished();
+
+    elseif canPlayerSkipDelay then
+
+      skipPageEvent:Fire();
+
+    end;
+
+  end, {currentPageIndex :: unknown, isTypingFinished, canPlayerSkipDelay, skipPageEvent, onPageFinished});
+
+  React.useEffect(function()
+  
+    properties.themeProperties.client:setContinueDialogueFunction(continueDialogue);
+
+    return function()
+
+      properties.themeProperties.client:setContinueDialogueFunction(nil);
+
+    end;
+
+  end, {properties.themeProperties.client});
+  
   useKeybindContinue(properties.themeProperties.client, continueDialogue);
 
   return React.createElement("Frame", {
