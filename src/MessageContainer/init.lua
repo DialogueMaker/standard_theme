@@ -65,7 +65,14 @@ local function MessageContainer(properties: MessageContainerProperties)
   end, {properties.themeProperties.client});
   
   useKeybindContinue(properties.themeProperties.client, continueDialogue);
-
+  
+  local doesNextDialogueExist = React.useMemo(function()
+    
+    local nextDialogue = properties.dialogue:findNextVerifiedDialogue();
+    return nextDialogue ~= nil;
+    
+  end, {properties.dialogue});
+  
   return React.createElement("Frame", {
     Size = UDim2.new(1, 0, 0, properties.height);
     BackgroundColor3 = Color3.fromHex("#202020");
@@ -100,7 +107,7 @@ local function MessageContainer(properties: MessageContainerProperties)
       dialogueSettings = properties.dialogueSettings;
       textSize = properties.textSize;
     });
-    ContinueIndicator = if properties.isTypingFinished and properties.currentPageIndex < #properties.pages then
+    ContinueIndicator = if properties.isTypingFinished and (properties.currentPageIndex < #properties.pages or doesNextDialogueExist) then
       React.createElement(ContinueIndicator)
     else nil;
   });
