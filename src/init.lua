@@ -94,7 +94,7 @@ local function StandardTheme(properties: ThemeProperties)
 
   end, {pages :: unknown, currentPageIndex});
 
-  return if not didRunInitializationAction then React.createElement("Frame", {
+  return if didRunInitializationAction then React.createElement("Frame", {
     AnchorPoint = Vector2.new(0.5, 1);
     Position = UDim2.new(0.5, 0, 1, -15);
     AutomaticSize = Enum.AutomaticSize.Y;
