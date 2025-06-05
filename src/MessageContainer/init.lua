@@ -5,6 +5,7 @@ local React = require(packages.react);
 local DialogueMakerTypes = require(packages.dialogue_maker_types);
 
 local ContinueIndicator = require(script.ContinueIndicator);
+local NameTag = require(script.NameTag);
 local ContentContainer = require(script.ContentContainer);
 local useKeybindContinue = require(packages.use_keybind_continue);
 
@@ -14,7 +15,6 @@ type ThemeProperties = DialogueMakerTypes.ThemeProperties;
 type DialogueSettings = DialogueMakerTypes.DialogueSettings;
 
 export type MessageContainerProperties = {
-  dialogue: Dialogue;
   currentPageIndex: number;
   skipPageEvent: BindableEvent;
   onPageFinished: () -> ();
@@ -68,11 +68,19 @@ local function MessageContainer(properties: MessageContainerProperties)
   
   local doesNextDialogueExist = React.useMemo(function()
     
-    local nextDialogue = properties.dialogue:findNextVerifiedDialogue();
+    local nextDialogue = properties.themeProperties.dialogue:findNextVerifiedDialogue();
     return nextDialogue ~= nil;
     
-  end, {properties.dialogue});
+  end, {properties.themeProperties.dialogue});
+
+  local conversationSettings = React.useMemo(function()
+
+    return properties.themeProperties.conversation:getSettings();
+
+  end, {properties.themeProperties.conversation});
   
+  local speakerName = properties.dialogueSettings.speaker.name or conversationSettings.speaker.name;
+
   return React.createElement("Frame", {
     Size = UDim2.new(1, 0, 0, properties.height);
     BackgroundColor3 = Color3.fromHex("#202020");
@@ -96,8 +104,12 @@ local function MessageContainer(properties: MessageContainerProperties)
     UICorner = React.createElement("UICorner", {
       CornerRadius = UDim.new(0, 5);
     });
+    NameTag = if speakerName then React.createElement(NameTag, {
+      speakerName = speakerName;
+      parentPadding = properties.padding;
+    }) else nil;
     ContentContainer = React.createElement(ContentContainer, {
-      dialogue = properties.dialogue;
+      dialogue = properties.themeProperties.dialogue;
       pages = properties.pages;
       currentPageIndex = currentPageIndex;
       skipPageEvent = skipPageEvent;

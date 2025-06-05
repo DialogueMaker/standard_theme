@@ -107,7 +107,6 @@ local function StandardTheme(properties: ThemeProperties)
       FillDirection = Enum.FillDirection.Vertical;
     });
     MessageContainer = React.createElement(MessageContainer, {
-      dialogue = properties.dialogue;
       pages = pages;
       currentPageIndex = currentPageIndex; 
       skipPageEvent = skipPageEvent;

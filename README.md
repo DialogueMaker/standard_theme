@@ -34,13 +34,21 @@ standard_theme = { name = "dialoguemaker/standard_theme", version = "^0.1.3" }
 ```
 
 ### Roblox Creator Store
-TBA
+standard_theme will be available on the Roblox Creator Store soon after v5.0.0 of the Dialogue Maker plugin is published.
 
 ### Wally
 standard_theme is currently unavailable on [Wally](https://wally.run). standard_theme relies on [React Lua](https://github.com/jsdotlua/react-lua) as a peer dependency to ensure that the theme targets the correct React object. Since Wally doesn't officially support peer dependencies, Wally would return a new version of React that the client isn't using. Thus, support for Wally isn't in the plans right now.
 
 ## Development
-TBA
+### Install dependencies
+This project uses [pesde](https://docs.pesde.dev/) as its package manager. Before working, you need to install the project's dependencies:
+
+```bash
+pesde install
+```
+
+### Start developing
+After this point, you're all set to work on the theme! 
 
 ## Acknowledgments
 standard_theme was created by [Christian Toney](https://github.com/Christian-Toney).
