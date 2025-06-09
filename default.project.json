@@ -1,14 +1,6 @@
 {
-  "name": "standard_theme",
+  "name": "StandardTheme",
   "tree": {
-    "$className": "Folder",
-    "roblox_packages": {
-      "$path": {
-        "optional": "roblox_packages"
-      }
-    },
-    "src": {
-      "$path": "src"
-    }
+    "$path": "src"
   }
 }
