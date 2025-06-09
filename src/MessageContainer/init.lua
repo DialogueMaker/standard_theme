@@ -2,16 +2,16 @@
 
 local packages = script.Parent.Parent.roblox_packages;
 local React = require(packages.react);
-local DialogueMakerTypes = require(packages.dialogue_maker_types);
+local DialogueMakerTypes = require(packages.DialogueMakerTypes);
 
 local ContinueIndicator = require(script.ContinueIndicator);
 local NameTag = require(script.NameTag);
 local ContentContainer = require(script.ContentContainer);
-local useKeybindContinue = require(packages.use_keybind_continue);
+local useKeybindContinue = require(packages.useKeybindContinue);
 
+type Client = DialogueMakerTypes.Client;
 type Page = DialogueMakerTypes.Page;
 type Dialogue = DialogueMakerTypes.Dialogue;
-type ThemeProperties = DialogueMakerTypes.ThemeProperties;
 type DialogueSettings = DialogueMakerTypes.DialogueSettings;
 
 export type MessageContainerProperties = {
@@ -20,10 +20,9 @@ export type MessageContainerProperties = {
   onPageFinished: () -> ();
   onTypingFinished: () -> ();
   isTypingFinished: boolean;
-  themeProperties: ThemeProperties;
+  client: Client;
   themeWidth: number;
   pages: {Page};
-  dialogueSettings: DialogueSettings;
   lineHeight: number;
   textSize: number;
   height: number;
@@ -35,9 +34,14 @@ local function MessageContainer(properties: MessageContainerProperties)
   local currentPageIndex = properties.currentPageIndex;
   local skipPageEvent = properties.skipPageEvent;
   local isTypingFinished = properties.isTypingFinished;
+  local client = properties.client;
+  local dialogue = client.dialogue;
+  local conversation = client.conversation;
   local onPageFinished = properties.onPageFinished;
 
-  local canPlayerSkipDelay = properties.dialogueSettings.typewriter.canPlayerSkipDelay;
+  -- Allow external scripts to skip pages and continue the dialogue outside of the theme.
+  local canPlayerSkipDelay = dialogue.settings.typewriter.canPlayerSkipDelay;
+
   local continueDialogue = React.useCallback(function()
 
     if isTypingFinished then
@@ -50,36 +54,31 @@ local function MessageContainer(properties: MessageContainerProperties)
 
     end;
 
-  end, {currentPageIndex :: unknown, isTypingFinished, canPlayerSkipDelay, skipPageEvent, onPageFinished});
+  end, {isTypingFinished :: unknown, canPlayerSkipDelay, skipPageEvent, onPageFinished});
 
   React.useEffect(function()
   
-    properties.themeProperties.client:setContinueDialogueFunction(continueDialogue);
+    client.continueDialogueBindableFunction.OnInvoke = continueDialogue;
 
     return function()
 
-      properties.themeProperties.client:setContinueDialogueFunction(nil);
+      client.continueDialogueBindableFunction.OnInvoke = function() end;
 
     end;
 
-  end, {properties.themeProperties.client});
+  end, {client});
   
-  useKeybindContinue(properties.themeProperties.client, continueDialogue);
-  
+  -- Outsource keybind support.
+  useKeybindContinue(client, continueDialogue);
+
   local doesNextDialogueExist = React.useMemo(function()
     
-    local nextDialogue = properties.themeProperties.dialogue:findNextVerifiedDialogue();
+    local nextDialogue = dialogue:findNextVerifiedDialogue();
     return nextDialogue ~= nil;
     
-  end, {properties.themeProperties.dialogue});
-
-  local conversationSettings = React.useMemo(function()
-
-    return properties.themeProperties.conversation:getSettings();
-
-  end, {properties.themeProperties.conversation});
+  end, {dialogue});
   
-  local speakerName = properties.dialogueSettings.speaker.name or conversationSettings.speaker.name;
+  local speakerName = dialogue.settings.speaker.name or conversation.settings.speaker.name;
 
   return React.createElement("Frame", {
     Size = UDim2.new(1, 0, 0, properties.height);
@@ -109,14 +108,14 @@ local function MessageContainer(properties: MessageContainerProperties)
       parentPadding = properties.padding;
     }) else nil;
     ContentContainer = React.createElement(ContentContainer, {
-      dialogue = properties.themeProperties.dialogue;
+      client = client;
+      conversation = conversation;
       pages = properties.pages;
       currentPageIndex = currentPageIndex;
       skipPageEvent = skipPageEvent;
       themeWidth = properties.themeWidth;
       onTypingFinished = properties.onTypingFinished;
       lineHeight = properties.lineHeight;
-      dialogueSettings = properties.dialogueSettings;
       textSize = properties.textSize;
     });
     ContinueIndicator = if properties.isTypingFinished and (properties.currentPageIndex < #properties.pages or doesNextDialogueExist) then

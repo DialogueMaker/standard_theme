@@ -2,17 +2,18 @@
 
 local packages = script.Parent.Parent.Parent.roblox_packages;
 local React = require(packages.react);
-local DialogueMakerTypes = require(packages.dialogue_maker_types);
+local DialogueMakerTypes = require(packages.DialogueMakerTypes);
 
 local MessageTextSegment = require(script.MessageTextSegment);
 
+type Client = DialogueMakerTypes.Client;
+type Conversation = DialogueMakerTypes.Conversation;
 type Dialogue = DialogueMakerTypes.Dialogue;
-type DialogueSettings = DialogueMakerTypes.DialogueSettings;
 type Page = DialogueMakerTypes.Page;
+type TextComponentProperties = MessageTextSegment.TextComponentProperties;
 
 export type ContentContainerProperties = {
-  dialogue: Dialogue;
-  dialogueSettings: DialogueSettings;
+  client: Client;
   pages: {Page};
   skipPageEvent: BindableEvent;
   currentPageIndex: number;
@@ -24,12 +25,15 @@ export type ContentContainerProperties = {
 
 local function ContentContainer(properties: ContentContainerProperties)
 
-  local contentContainerWidth = properties.themeWidth - 30;
-  local shouldSkip, setShouldSkip = React.useState(false);
-  local componentIndex, setComponentIndex = React.useState(1);
+  local client = properties.client;
+  local dialogue = client.dialogue;
+  local conversation = client.conversation;
   local skipPageEvent = properties.skipPageEvent;
   local pages = properties.pages;
   local currentPageIndex = properties.currentPageIndex;
+
+  local shouldSkip, setShouldSkip = React.useState(false);
+  local targetComponentIndex, setTargetComponentIndex = React.useState(1);
 
   React.useEffect(function(): ()
 
@@ -53,74 +57,75 @@ local function ContentContainer(properties: ContentContainerProperties)
 
   React.useEffect(function(): ()
 
-    setComponentIndex(1);
+    setTargetComponentIndex(1);
 
   end, {pages :: unknown, currentPageIndex});
 
-  local messageComponentList = {};
+  local visibleComponents = {};
 
   local page = pages[currentPageIndex];
   if page then
 
-    for index, dialogueContentItem in page do
+    for currentComponentIndex = 1, targetComponentIndex do
 
-      if index > componentIndex then
-
-        break;
-
-      end;
+      local component = page[currentComponentIndex];
 
       local function onComplete()
 
-        if index == #page then
+        if currentComponentIndex == #page then
 
           setShouldSkip(false);
           properties.onTypingFinished();
 
-        elseif index == componentIndex then
+        elseif currentComponentIndex == targetComponentIndex then
 
-          setComponentIndex(componentIndex + 1);
+          setTargetComponentIndex(targetComponentIndex + 1);
 
         end;
 
       end;
 
-      local dialogueModuleScriptFullName = properties.dialogue.moduleScript:GetFullName();
-      if typeof(dialogueContentItem) == "string" then
+      local typewriterCharacterDelay = if shouldSkip then 0 else dialogue.settings.typewriter.characterDelaySeconds or conversation.settings.typewriter.characterDelaySeconds or client.settings.typewriter.characterDelaySeconds;
+      local componentKey = `{dialogue}.{currentPageIndex}.{currentComponentIndex}`;
+      local skipPageSignal = if skipPageEvent then skipPageEvent.Event else nil;
+
+      if typeof(component) == "string" then
         
         local textSegment = React.createElement(MessageTextSegment, {
-          text = dialogueContentItem;
-          skipPageSignal = if skipPageEvent then skipPageEvent.Event else nil;
-          layoutOrder = index;
+          text = component;
+          client = client;
+          skipPageSignal = skipPageSignal;
+          layoutOrder = currentComponentIndex;
           textSize = properties.textSize;
-          contentContainerWidth = contentContainerWidth;
-          key = `{dialogueModuleScriptFullName}.{currentPageIndex}.{index}`;
+          key = componentKey;
           lineHeight = properties.lineHeight;
-          letterDelay = if shouldSkip then 0 else properties.dialogueSettings.typewriter.characterDelaySeconds;
+          letterDelay = typewriterCharacterDelay;
           onComplete = onComplete;
         });
 
-        table.insert(messageComponentList, textSegment);
+        table.insert(visibleComponents, textSegment);
 
       else
 
-        local possibleComponent = dialogueContentItem:run({
-          shouldSkip = shouldSkip or componentIndex > index;
-          skipPageSignal = if skipPageEvent then skipPageEvent.Event else nil;
+        local possibleComponent = component:run({
+          client = client;
+          shouldSkip = shouldSkip or targetComponentIndex > currentComponentIndex;
+          skipPageSignal = skipPageSignal;
+          key = componentKey;
+          textComponentProperties = {
+            client = client;
+            layoutOrder = currentComponentIndex;
+            letterDelay = typewriterCharacterDelay;
+            lineHeight = properties.lineHeight;
+            textSize = properties.textSize;
+          } :: TextComponentProperties;
           continuePage = onComplete;
           textComponent = MessageTextSegment;
-          textComponentProperties = {
-            layoutOrder = index;
-            letterDelay = if shouldSkip then 0 else properties.dialogueSettings.typewriter.characterDelaySeconds;
-            textSize = properties.textSize;
-            contentContainerWidth = contentContainerWidth;
-          };
-          key = `{dialogueModuleScriptFullName}.{currentPageIndex}.{index}`;
         });
 
         if possibleComponent then
 
-          table.insert(messageComponentList, possibleComponent);
+          table.insert(visibleComponents, possibleComponent);
 
         end;
 
@@ -141,7 +146,7 @@ local function ContentContainer(properties: ContentContainerProperties)
       FillDirection = Enum.FillDirection.Horizontal;
       Wraps = true;
     });
-    MessageComponentList = React.createElement(React.Fragment, {}, messageComponentList);
+    MessageComponentList = React.createElement(React.Fragment, {}, visibleComponents);
   });
 
 end;

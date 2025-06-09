@@ -1,13 +1,14 @@
 --!strict
--- BareBonesTheme is the first theme that was created for Dialogue Maker.
--- As the name describes, it is a barebones theme that priorities function over form.
+-- StandardTheme is a barebones theme that priorities function over form.
+-- It is designed to be simple, general purpose, and work out of the box.
 -- Developers can use this theme as a template for creating their own.
 --
 -- Programmer: Christian Toney (Christian_Toney)
+-- © 2023 – 2025 Dialogue Maker Group
 
 local packages = script.Parent.roblox_packages;
 local React = require(packages.react);
-local DialogueMakerTypes = require(packages.dialogue_maker_types);
+local DialogueMakerTypes = require(packages.DialogueMakerTypes);
 
 local MessageContainer = require(script.MessageContainer);
 local ResponseContainer = require(script.ResponseContainer);
@@ -17,12 +18,24 @@ local usePages = require(packages.use_pages);
 
 type ThemeProperties = DialogueMakerTypes.ThemeProperties;
 
-local skipPageEvent = Instance.new("BindableEvent");
-
 local function StandardTheme(properties: ThemeProperties)
 
+  local client = properties.client;
+  local dialogue = client.dialogue;
   local textSize = 20;
   local lineHeight = 1.25;
+  local messageContainerHeight = 75;
+  local messageContainerPadding = 15;
+  
+  local currentPageIndex, setCurrentPageIndex = React.useState(1);
+  local skipPageEvent = React.useMemo(function()
+
+    return Instance.new("BindableEvent");
+
+  end, {});
+  local didRunInitializationAction, setDidRunInitializationAction = React.useState(false);
+  
+  -- Split the dialogue into pages based on the canvas and device size.
   local sizes = React.useMemo(function()
 
     return {
@@ -41,14 +54,6 @@ local function StandardTheme(properties: ThemeProperties)
     }
   });
   local size = sizes[dynamicSizeIndex or #sizes];
-  local currentPageIndex, setCurrentPageIndex = React.useState(1);
-  local dialogueSettings, dialogueContent = React.useMemo(function()
-    
-    return properties.dialogue:getSettings(), properties.dialogue:getContent();
-
-  end, {properties.dialogue});
-  local messageContainerHeight = 75;
-  local messageContainerPadding = 15;
   local pageFittingProperties = React.useMemo(function()
 
     return {
@@ -59,14 +64,29 @@ local function StandardTheme(properties: ThemeProperties)
     };
 
   end, {size :: unknown, textSize, lineHeight});
-  local pages = usePages(dialogueContent, pageFittingProperties);
-  local didRunInitializationAction, setDidRunInitializationAction = React.useState(false);
+  local dialogueContent = React.useMemo(function()
+    
+    return dialogue:getContent();
 
+  end, {dialogue});
+  local pages = usePages(dialogueContent, pageFittingProperties);
+
+  -- Run the initialization action for the dialogue if necessary.
   React.useEffect(function()
   
-    if properties.dialogue then
+    if dialogue then
 
-      properties.dialogue:runInitializationAction(properties.client);
+      dialogue:runInitializationAction(client);
+
+      if dialogue.type == "Redirect" then
+
+        local nextDialogue = dialogue:findNextVerifiedDialogue();
+        client:clone({
+          dialogue = nextDialogue;
+        })
+
+      end;
+
       setDidRunInitializationAction(true);
 
     end;
@@ -77,15 +97,15 @@ local function StandardTheme(properties: ThemeProperties)
 
     end;
 
-  end, {properties.dialogue});
+  end, {client :: unknown, dialogue});
 
+  -- Reset the current page index when the page list changes.
   React.useEffect(function()
 
     setCurrentPageIndex(1);
 
   end, {pages :: unknown});
 
-  local responses = useResponses(properties.dialogue);
   local isTypingFinished, setIsTypingFinished = React.useState(false);
   
   React.useEffect(function()
@@ -94,59 +114,64 @@ local function StandardTheme(properties: ThemeProperties)
 
   end, {pages :: unknown, currentPageIndex});
 
-  return if didRunInitializationAction then React.createElement("Frame", {
-    AnchorPoint = Vector2.new(0.5, 1);
-    Position = UDim2.new(0.5, 0, 1, -15);
-    AutomaticSize = Enum.AutomaticSize.Y;
-    Size = UDim2.fromOffset(size.width, 0);
-    BackgroundTransparency = 1;
-  }, {
-    UIListLayout = React.createElement("UIListLayout", {
-      SortOrder = Enum.SortOrder.LayoutOrder;
-      Padding = UDim.new(0, 5);
-      FillDirection = Enum.FillDirection.Vertical;
-    });
-    MessageContainer = React.createElement(MessageContainer, {
-      pages = pages;
-      currentPageIndex = currentPageIndex; 
-      skipPageEvent = skipPageEvent;
-      themeProperties = properties;
-      isTypingFinished = isTypingFinished;
-      themeWidth = size.width;
-      lineHeight = lineHeight;
-      dialogueSettings = dialogueSettings;
-      textSize = textSize;
-      height = messageContainerHeight;
-      padding = messageContainerPadding;
-      onTypingFinished = function()
+  local responses = useResponses(dialogue); -- TODO: Update this with memoization.
 
-        setIsTypingFinished(true);
+  return if didRunInitializationAction then
+    React.createElement("Frame", {
+      AnchorPoint = Vector2.new(0.5, 1);
+      Position = UDim2.new(0.5, 0, 1, -15);
+      AutomaticSize = Enum.AutomaticSize.Y;
+      Size = UDim2.fromOffset(size.width, 0);
+      BackgroundTransparency = 1;
+    }, {
+      UIListLayout = React.createElement("UIListLayout", {
+        SortOrder = Enum.SortOrder.LayoutOrder;
+        Padding = UDim.new(0, 5);
+        FillDirection = Enum.FillDirection.Vertical;
+      });
+      MessageContainer = React.createElement(MessageContainer, {
+        pages = pages;
+        currentPageIndex = currentPageIndex; 
+        skipPageEvent = skipPageEvent;
+        isTypingFinished = isTypingFinished;
+        client = client;
+        themeWidth = size.width;
+        lineHeight = lineHeight;
+        textSize = textSize;
+        height = messageContainerHeight;
+        padding = messageContainerPadding;
+        onTypingFinished = function()
 
-      end;
-      onPageFinished = function()
-
-        if #pages > currentPageIndex then
-          
-          setCurrentPageIndex(currentPageIndex + 1);
-        
-        elseif #responses == 0 then
-
-          properties.dialogue:runCompletionAction(properties.client);
+          setIsTypingFinished(true);
 
         end;
+        onPageFinished = function()
 
-      end;
-      setCurrentPageIndex = setCurrentPageIndex;
-    });
-    ResponseContainer = if #responses > 0 and (not dialogueSettings.typewriter.shouldShowResponseWhileTyping or isTypingFinished) then React.createElement(ResponseContainer, {
-      responses = responses;
-      onComplete = function(requestedDialogue)
+          if #pages > currentPageIndex then
+            
+            setCurrentPageIndex(currentPageIndex + 1);
+          
+          elseif #responses == 0 then
 
-        properties.dialogue:runCompletionAction(properties.client, requestedDialogue);
+            dialogue:runCompletionAction(client);
 
-      end;
-    }) else nil;
-  }) else nil;
+          end;
+
+        end;
+        setCurrentPageIndex = setCurrentPageIndex;
+      });
+      ResponseContainer = if #responses > 0 and currentPageIndex == #pages and (not dialogue.settings.typewriter.shouldShowResponseWhileTyping or isTypingFinished) then 
+        React.createElement(ResponseContainer, {
+          responses = responses;
+          onComplete = function(requestedDialogue)
+
+            dialogue:runCompletionAction(client, requestedDialogue);
+
+          end;
+        }) 
+      else nil;
+    })
+  else nil;
 
 end;
 
