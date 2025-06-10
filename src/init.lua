@@ -1,7 +1,7 @@
 --!strict
 -- StandardTheme is a barebones theme that priorities function over form.
 -- It is designed to be simple, general purpose, and work out of the box.
--- Developers can use this theme as a template for creating their own.
+-- Developers can use this theme as a template for creating their own themes.
 --
 -- Programmer: Christian Toney (Christian_Toney)
 -- © 2023 – 2025 Dialogue Maker Group

@@ -1,4 +1,9 @@
 --!strict
+-- MessageContainer contains the main dialogue text, speaker name, and the continue indicator.
+-- It also hosts some logic that is shared between components for skipping pages and continuing the dialogue.
+-- 
+-- Programmer: Christian Toney (Christian_Toney)
+-- © 2023 – 2025 Dialogue Maker Group
 
 local packages = script.Parent.Parent.roblox_packages;
 local React = require(packages.react);

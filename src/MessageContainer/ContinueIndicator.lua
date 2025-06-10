@@ -1,4 +1,9 @@
 --!strict
+-- ContinueIndicator is a component that displays a small image in the message container.
+-- It indicates that the player can continue the dialogue by clicking or tapping on the container.
+--
+-- Programmer: Christian Toney (Christian_Toney)
+-- © 2025 Dialogue Maker Group
 
 local TweenService = game:GetService("TweenService");
 

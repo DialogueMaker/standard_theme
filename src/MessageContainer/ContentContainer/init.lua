@@ -1,16 +1,20 @@
 --!strict
+-- ContentContainer is a component that displays the current page of the dialogue.
+-- 
+-- Programmer: Christian Toney (Christian_Toney)
+-- © 2025 Dialogue Maker Group
 
 local packages = script.Parent.Parent.Parent.roblox_packages;
 local React = require(packages.react);
 local DialogueMakerTypes = require(packages.DialogueMakerTypes);
 
-local MessageTextSegment = require(script.MessageTextSegment);
+local MessageText = require(script.MessageText);
 
 type Client = DialogueMakerTypes.Client;
 type Conversation = DialogueMakerTypes.Conversation;
 type Dialogue = DialogueMakerTypes.Dialogue;
 type Page = DialogueMakerTypes.Page;
-type TextComponentProperties = MessageTextSegment.TextComponentProperties;
+type MessageTextProperties = MessageText.MessageTextProperties;
 
 export type ContentContainerProperties = {
   client: Client;
@@ -55,6 +59,7 @@ local function ContentContainer(properties: ContentContainerProperties)
 
   end, {pages :: unknown, skipPageEvent, currentPageIndex});
 
+  -- Reset the target component index when the page changes for a blank slate.
   React.useEffect(function(): ()
 
     setTargetComponentIndex(1);
@@ -68,9 +73,10 @@ local function ContentContainer(properties: ContentContainerProperties)
 
     for currentComponentIndex = 1, targetComponentIndex do
 
-      local component = page[currentComponentIndex];
-
-      local function onComplete()
+      --[[
+        Re-renders the content container with a new page or the next component in the current page.
+      ]]
+      local function continuePage()
 
         if currentComponentIndex == #page then
 
@@ -88,10 +94,11 @@ local function ContentContainer(properties: ContentContainerProperties)
       local typewriterCharacterDelay = if shouldSkip then 0 else dialogue.settings.typewriter.characterDelaySeconds or conversation.settings.typewriter.characterDelaySeconds or client.settings.typewriter.characterDelaySeconds;
       local componentKey = `{dialogue}.{currentPageIndex}.{currentComponentIndex}`;
       local skipPageSignal = if skipPageEvent then skipPageEvent.Event else nil;
+      local component = page[currentComponentIndex];
 
       if typeof(component) == "string" then
         
-        local textSegment = React.createElement(MessageTextSegment, {
+        local textSegment = React.createElement(MessageText, {
           text = component;
           client = client;
           skipPageSignal = skipPageSignal;
@@ -100,7 +107,7 @@ local function ContentContainer(properties: ContentContainerProperties)
           key = componentKey;
           lineHeight = properties.lineHeight;
           letterDelay = typewriterCharacterDelay;
-          onComplete = onComplete;
+          onComplete = continuePage;
         });
 
         table.insert(visibleComponents, textSegment);
@@ -118,9 +125,9 @@ local function ContentContainer(properties: ContentContainerProperties)
             letterDelay = typewriterCharacterDelay;
             lineHeight = properties.lineHeight;
             textSize = properties.textSize;
-          } :: TextComponentProperties;
-          continuePage = onComplete;
-          textComponent = MessageTextSegment;
+          } :: MessageTextProperties;
+          continuePage = continuePage;
+          textComponent = MessageText;
         });
 
         if possibleComponent then

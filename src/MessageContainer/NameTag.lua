@@ -1,4 +1,8 @@
 --!strict
+-- NameTag is a component that displays the speaker's name in the message container.
+-- 
+-- Programmer: Christian Toney (Christian_Toney)
+-- © 2025 Dialogue Maker Group
 
 local packages = script.Parent.Parent.Parent.roblox_packages;
 local React = require(packages.react);

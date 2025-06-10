@@ -1,4 +1,9 @@
 --!strict
+-- MessageText is a component that displays a string of text in the message container.
+-- It may use a typewriter effect to display the text one character at a time.
+-- 
+-- Programmer: Christian Toney (Christian_Toney)
+-- © 2025 Dialogue Maker Group
 
 local packages = script.Parent.Parent.Parent.Parent.roblox_packages;
 local React = require(packages.react);
@@ -9,7 +14,7 @@ local useTypewriter = require(packages.use_typewriter);
 
 type Client = DialogueMakerTypes.Client;
 
-export type TextComponentProperties = {
+export type MessageTextProperties = {
   text: string;
   skipPageSignal: RBXScriptSignal?;
   letterDelay: number;
@@ -20,7 +25,7 @@ export type TextComponentProperties = {
   client: Client;
 }
 
-local function TextSegment(properties: TextComponentProperties)
+local function MessageText(properties: MessageTextProperties)
 
   local text = properties.text;
   local lineHeight = properties.lineHeight;
@@ -93,4 +98,4 @@ local function TextSegment(properties: TextComponentProperties)
 
 end;
 
-return TextSegment;
+return MessageText;
