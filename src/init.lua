@@ -114,6 +114,16 @@ local function StandardTheme(properties: ThemeProperties)
 
   end, {pages :: unknown, currentPageIndex});
 
+  React.useEffect(function()
+  
+    if isTypingFinished then
+
+      dialogue:runCompletionAction(client);
+
+    end;
+
+  end, {dialogue :: unknown, client, isTypingFinished});
+
   local responses = useResponses(dialogue); -- TODO: Update this with memoization.
 
   return if didRunInitializationAction then
@@ -153,7 +163,7 @@ local function StandardTheme(properties: ThemeProperties)
           
           elseif #responses == 0 then
 
-            dialogue:runCompletionAction(client);
+            dialogue:runCleanupAction(client);
 
           end;
 
@@ -165,7 +175,7 @@ local function StandardTheme(properties: ThemeProperties)
           responses = responses;
           onComplete = function(requestedDialogue)
 
-            dialogue:runCompletionAction(client, requestedDialogue);
+            dialogue:runCleanupAction(client, requestedDialogue);
 
           end;
         }) 
