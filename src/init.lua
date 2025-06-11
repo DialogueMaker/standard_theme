@@ -33,7 +33,6 @@ local function StandardTheme(properties: ThemeProperties)
     return Instance.new("BindableEvent");
 
   end, {});
-  local didRunInitializationAction, setDidRunInitializationAction = React.useState(false);
   
   -- Split the dialogue into pages based on the canvas and device size.
   local sizes = React.useMemo(function()
@@ -72,32 +71,18 @@ local function StandardTheme(properties: ThemeProperties)
   local pages = usePages(dialogueContent, pageFittingProperties);
 
   -- Run the initialization action for the dialogue if necessary.
+  local didRunInitializationAction, setDidRunInitializationAction = React.useState(false);
+  local oldClient, setOldClient = React.useState(client);
   React.useEffect(function()
-  
-    if dialogue then
 
-      dialogue:runInitializationAction(client);
+    if oldClient ~= client then
 
-      if dialogue.type == "Redirect" then
-
-        local nextDialogue = dialogue:findNextVerifiedDialogue();
-        client:clone({
-          dialogue = nextDialogue;
-        })
-
-      end;
-
-      setDidRunInitializationAction(true);
-
-    end;
-
-    return function()
-
+      setOldClient(client);
       setDidRunInitializationAction(false);
 
     end;
 
-  end, {client :: unknown, dialogue});
+  end, {client, oldClient});
 
   -- Reset the current page index when the page list changes.
   React.useEffect(function()
@@ -114,74 +99,83 @@ local function StandardTheme(properties: ThemeProperties)
 
   end, {pages :: unknown, currentPageIndex});
 
-  React.useEffect(function()
-  
-    if isTypingFinished then
+  local responses = useResponses(dialogue); -- TODO: Update this with memoization.
 
-      dialogue:runCompletionAction(client);
+  if not didRunInitializationAction then
+
+    if dialogue.type == "Redirect" then
+
+      local nextDialogue = dialogue:findNextVerifiedDialogue();
+      client:clone({
+        dialogue = nextDialogue;
+      });
+
+    else
+
+      dialogue:runInitializationAction(client);
+      setDidRunInitializationAction(true);
 
     end;
 
-  end, {dialogue :: unknown, client, isTypingFinished});
+    return React.createElement(React.Fragment);
 
-  local responses = useResponses(dialogue); -- TODO: Update this with memoization.
+  end;
 
-  return if didRunInitializationAction and dialogue.type ~= "Redirect" then
-    React.createElement("Frame", {
-      AnchorPoint = Vector2.new(0.5, 1);
-      Position = UDim2.new(0.5, 0, 1, -15);
-      AutomaticSize = Enum.AutomaticSize.Y;
-      Size = UDim2.fromOffset(size.width, 0);
-      BackgroundTransparency = 1;
-    }, {
-      UIListLayout = React.createElement("UIListLayout", {
-        SortOrder = Enum.SortOrder.LayoutOrder;
-        Padding = UDim.new(0, 5);
-        FillDirection = Enum.FillDirection.Vertical;
-      });
-      MessageContainer = React.createElement(MessageContainer, {
-        pages = pages;
-        currentPageIndex = currentPageIndex; 
-        skipPageEvent = skipPageEvent;
-        isTypingFinished = isTypingFinished;
-        client = client;
-        themeWidth = size.width;
-        lineHeight = lineHeight;
-        textSize = textSize;
-        height = messageContainerHeight;
-        padding = messageContainerPadding;
-        onTypingFinished = function()
+  return React.createElement("Frame", {
+    AnchorPoint = Vector2.new(0.5, 1);
+    Position = UDim2.new(0.5, 0, 1, -15);
+    AutomaticSize = Enum.AutomaticSize.Y;
+    Size = UDim2.fromOffset(size.width, 0);
+    BackgroundTransparency = 1;
+  }, {
+    UIListLayout = React.createElement("UIListLayout", {
+      SortOrder = Enum.SortOrder.LayoutOrder;
+      Padding = UDim.new(0, 5);
+      FillDirection = Enum.FillDirection.Vertical;
+    });
+    MessageContainer = React.createElement(MessageContainer, {
+      pages = pages;
+      currentPageIndex = currentPageIndex; 
+      skipPageEvent = skipPageEvent;
+      isTypingFinished = isTypingFinished;
+      client = client;
+      themeWidth = size.width;
+      lineHeight = lineHeight;
+      textSize = textSize;
+      height = messageContainerHeight;
+      padding = messageContainerPadding;
+      onTypingFinished = function()
 
-          setIsTypingFinished(true);
+        setIsTypingFinished(true);
+        dialogue:runCompletionAction(client);
 
-        end;
-        onPageFinished = function()
+      end;
+      onPageFinished = function()
 
-          if #pages > currentPageIndex then
-            
-            setCurrentPageIndex(currentPageIndex + 1);
+        if #pages > currentPageIndex then
           
-          elseif #responses == 0 then
+          setCurrentPageIndex(currentPageIndex + 1);
+        
+        elseif #responses == 0 then
 
-            dialogue:runCleanupAction(client);
-
-          end;
+          dialogue:runCleanupAction(client);
 
         end;
-        setCurrentPageIndex = setCurrentPageIndex;
-      });
-      ResponseContainer = if #responses > 0 and currentPageIndex == #pages and (not dialogue.settings.typewriter.shouldShowResponseWhileTyping or isTypingFinished) then 
-        React.createElement(ResponseContainer, {
-          responses = responses;
-          onComplete = function(requestedDialogue)
 
-            dialogue:runCleanupAction(client, requestedDialogue);
+      end;
+      setCurrentPageIndex = setCurrentPageIndex;
+    });
+    ResponseContainer = if #responses > 0 and currentPageIndex == #pages and (not dialogue.settings.typewriter.shouldShowResponseWhileTyping or isTypingFinished) then 
+      React.createElement(ResponseContainer, {
+        responses = responses;
+        onComplete = function(requestedDialogue)
 
-          end;
-        }) 
-      else nil;
-    })
-  else nil;
+          dialogue:runCleanupAction(client, requestedDialogue);
+
+        end;
+      }) 
+    else nil;
+  });
 
 end;
 

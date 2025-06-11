@@ -59,17 +59,17 @@ local function ContentContainer(properties: ContentContainerProperties)
 
   end, {pages :: unknown, skipPageEvent, currentPageIndex});
 
+  local visibleComponents = {};
+
   -- Reset the target component index when the page changes for a blank slate.
+  local page = pages[currentPageIndex];
   React.useEffect(function(): ()
 
     setTargetComponentIndex(1);
 
-  end, {pages :: unknown, currentPageIndex});
+  end, {page});
 
-  local visibleComponents = {};
-
-  local page = pages[currentPageIndex];
-  if page then
+  if page and page[targetComponentIndex] then
 
     for currentComponentIndex = 1, targetComponentIndex do
 
