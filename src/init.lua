@@ -103,17 +103,15 @@ local function StandardTheme(properties: ThemeProperties)
 
   if not didRunInitializationAction then
 
-    if dialogue.type == "Redirect" then
+    dialogue:runInitializationAction(client);
+    setDidRunInitializationAction(true);
+
+    if dialogue.type ~= "Message" then
 
       local nextDialogue = dialogue:findNextVerifiedDialogue();
       client:clone({
         dialogue = nextDialogue;
       });
-
-    else
-
-      dialogue:runInitializationAction(client);
-      setDidRunInitializationAction(true);
 
     end;
 
