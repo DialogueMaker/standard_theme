@@ -78,7 +78,7 @@ local function ContentContainer(properties: ContentContainerProperties)
       ]]
       local function continuePage()
 
-        if currentComponentIndex == #page then
+        if currentComponentIndex >= #page then
 
           setShouldSkip(false);
           properties.onTypingFinished();
@@ -112,7 +112,7 @@ local function ContentContainer(properties: ContentContainerProperties)
 
         table.insert(visibleComponents, textSegment);
 
-      else
+      elseif typeof(component) == "table" then
 
         local possibleComponent = component:run({
           client = client;
@@ -135,6 +135,11 @@ local function ContentContainer(properties: ContentContainerProperties)
           table.insert(visibleComponents, possibleComponent);
 
         end;
+
+      else
+
+        warn(`Unsupported component type at index {currentComponentIndex} on page {currentPageIndex}. Expected string or table, got {typeof(component)}.`);
+        continuePage();
 
       end;
 

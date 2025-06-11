@@ -126,7 +126,7 @@ local function StandardTheme(properties: ThemeProperties)
 
   local responses = useResponses(dialogue); -- TODO: Update this with memoization.
 
-  return if didRunInitializationAction then
+  return if didRunInitializationAction and dialogue.type ~= "Redirect" then
     React.createElement("Frame", {
       AnchorPoint = Vector2.new(0.5, 1);
       Position = UDim2.new(0.5, 0, 1, -15);
