@@ -78,8 +78,18 @@ local function MessageContainer(properties: MessageContainerProperties)
 
   local doesNextDialogueExist = React.useMemo(function()
     
-    local nextDialogue = dialogue:findNextVerifiedDialogue();
-    return nextDialogue ~= nil;
+    local children = dialogue:getChildren();
+    for _, child in children do
+
+      if child.type == "Message" and child:verifyCondition() then
+
+        return true;
+
+      end;
+
+    end;
+
+    return false;
     
   end, {dialogue});
   
