@@ -21,7 +21,6 @@ type Dialogue = DialogueMakerTypes.Dialogue;
 type DialogueSettings = DialogueMakerTypes.DialogueSettings;
 
 export type MessageContainerProperties = {
-  skipPageEvent: BindableEvent;
   onPageFinished: () -> ();
   onTypingFinished: () -> ();
   isTypingFinished: boolean;
@@ -30,13 +29,17 @@ export type MessageContainerProperties = {
 
 local function MessageContainer(properties: MessageContainerProperties)
 
-  local skipPageEvent = properties.skipPageEvent;
   local isTypingFinished = properties.isTypingFinished;
   local client = properties.client;
   local dialogue = client.dialogue;
   local conversation = client.conversation;
   local onPageFinished = properties.onPageFinished;
   local nextMessage = useNextMessage(dialogue);
+  local skipPageEvent = React.useMemo(function()
+
+    return Instance.new("BindableEvent");
+
+  end, {});
 
   local height = 75;
   local padding = 15;

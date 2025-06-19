@@ -23,34 +23,13 @@ local function StandardTheme(properties: ThemeProperties)
   local client = properties.client;
   local dialogue = client.dialogue;
   
-  local skipPageEvent = React.useMemo(function()
-
-    return Instance.new("BindableEvent");
-
-  end, {});
-  
-  -- Split the dialogue into pages based on the canvas and device size.
-  local sizes = React.useMemo(function()
-
-    return {
-      {
-        width = 500;
-      },
-      {
-        width = 310;
-      }
-    };
-
-  end, {});
-  local dynamicSizeIndex = useDynamicSize({
-    {
-      minimumWidth = 736;
-    }
-  });
-  local size = sizes[dynamicSizeIndex or #sizes];
+  -- Choose a width based on the device type.
+  local phoneWidth = 310;
+  local tabletWidth = 500;
+  local canUseTabletWidth = useDynamicSize(client.dialogueGUI, 736);
+  local width = if canUseTabletWidth then tabletWidth else phoneWidth;
 
   local isTypingFinished, setIsTypingFinished = React.useState(false);
-  
   React.useEffect(function()
   
     setIsTypingFinished(false);
@@ -59,7 +38,7 @@ local function StandardTheme(properties: ThemeProperties)
 
   local didRunInitializationAction = useInitializationAction(client);
   local message = useMessage(client);
-  local responses = useResponses(dialogue); -- TODO: Update this with memoization.
+  local responses = useResponses(dialogue);
 
   if not didRunInitializationAction or not message then
 
@@ -71,7 +50,7 @@ local function StandardTheme(properties: ThemeProperties)
     AnchorPoint = Vector2.new(0.5, 1);
     Position = UDim2.new(0.5, 0, 1, -15);
     AutomaticSize = Enum.AutomaticSize.Y;
-    Size = UDim2.fromOffset(size.width, 0);
+    Size = UDim2.fromOffset(width, 0);
     BackgroundTransparency = 1;
   }, {
     UIListLayout = React.createElement("UIListLayout", {
@@ -80,7 +59,6 @@ local function StandardTheme(properties: ThemeProperties)
       FillDirection = Enum.FillDirection.Vertical;
     });
     MessageContainer = React.createElement(MessageContainer, {
-      skipPageEvent = skipPageEvent;
       isTypingFinished = isTypingFinished;
       client = client;
       onTypingFinished = function()
