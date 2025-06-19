@@ -37,6 +37,8 @@ local function MessageContainer(properties: MessageContainerProperties)
   local nextMessage = useNextMessage(dialogue);
   local skipPageEvent = React.useMemo(function()
 
+    -- A BindableEvent ensures that messages can be skipped even during effects.
+    -- Some effects like PauseEffect are outside of the React lifecycle.
     return Instance.new("BindableEvent");
 
   end, {});

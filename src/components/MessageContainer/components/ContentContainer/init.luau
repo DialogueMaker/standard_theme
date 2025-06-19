@@ -8,6 +8,7 @@ local packages = script.Parent.Parent.Parent.Parent.Parent.roblox_packages;
 local React = require(packages.react);
 local DialogueMakerTypes = require(packages.DialogueMakerTypes);
 local MessageText = require(script.components.MessageText);
+local useSkipPageSignal = require(script.hooks.useSkipPageSignal);
 
 type Client = DialogueMakerTypes.Client;
 type Conversation = DialogueMakerTypes.Conversation;
@@ -32,115 +33,103 @@ local function ContentContainer(properties: ContentContainerProperties)
   local skipPageEvent = properties.skipPageEvent;
 
   local shouldSkip, setShouldSkip = React.useState(false);
-
-  React.useEffect(function(): ()
-
-    if skipPageEvent then
-
-      local skipPageSignal = skipPageEvent.Event:Once(function()
-
-        setShouldSkip(true);
-
-      end);
-
-      return function()
-
-        skipPageSignal:Disconnect();
-
-      end;
-
-    end;
-
-  end, {skipPageEvent});
-  
-  local dialogueContent = React.useMemo(function()
-    
-    return dialogue:getContent();
-   
-  end, {dialogue});
-
-  local visibleComponents = {};
+  useSkipPageSignal(skipPageEvent.Event, setShouldSkip);
 
   -- Reset the target component index when the page changes for a blank slate.
   local targetComponentIndex, setTargetComponentIndex = React.useState(1);
-  
+
   React.useEffect(function(): ()
 
     setTargetComponentIndex(1);
 
   end, {dialogue});
 
-  for currentComponentIndex = 1, targetComponentIndex do
+  -- Memoize the dialogue content to avoid calling getContent() on every render.
+  local dialogueContent = React.useMemo(function()
     
-    --[[
-      Re-renders the content container with a new page or the next component in the current page.
-    ]]
-    local function continuePage()
+    return dialogue:getContent();
+   
+  end, {dialogue});
 
-      if currentComponentIndex >= #dialogueContent then
+  local visibleComponents = React.useMemo(function()
 
-        setShouldSkip(false);
-        properties.onTypingFinished();
+    local visibleComponents: {React.ReactNode} = {};
 
-      elseif currentComponentIndex == targetComponentIndex then
-
-        setTargetComponentIndex(targetComponentIndex + 1);
-
-      end;
-
-    end;
-
-    local typewriterCharacterDelay = if shouldSkip then 0 else dialogue.settings.typewriter.characterDelaySeconds or conversation.settings.typewriter.characterDelaySeconds or client.settings.typewriter.characterDelaySeconds;
-    local componentKey = `{dialogue}.{currentComponentIndex}`;
-    local component = dialogueContent[currentComponentIndex];
-
-    if typeof(component) == "string" then
+    for currentComponentIndex = 1, targetComponentIndex do
       
-      local textSegment = React.createElement(MessageText, {
-        text = component;
-        client = client;
-        skipPageSignal = skipPageEvent.Event;
-        layoutOrder = currentComponentIndex;
-        textSize = textSize;
-        key = componentKey;
-        lineHeight = lineHeight;
-        letterDelay = typewriterCharacterDelay;
-        onComplete = continuePage;
-      });
+      --[[
+        Re-renders the content container with a new page or the next component in the current page.
+      ]]
+      local function continuePage()
 
-      table.insert(visibleComponents, textSegment);
+        if currentComponentIndex >= #dialogueContent then
 
-    elseif typeof(component) == "table" then
+          setShouldSkip(false);
+          properties.onTypingFinished();
 
-      local possibleComponent = component:run({
-        client = client;
-        shouldSkip = shouldSkip or targetComponentIndex > currentComponentIndex;
-        skipPageSignal = skipPageEvent.Event;
-        key = componentKey;
-        textComponentProperties = {
-          layoutOrder = currentComponentIndex;
-          letterDelay = typewriterCharacterDelay;
-          lineHeight = lineHeight;
-          textSize = textSize;
-        } :: MessageTextProperties;
-        continuePage = continuePage;
-        textComponent = MessageText;
-      });
+        elseif currentComponentIndex == targetComponentIndex then
 
-      if possibleComponent then
+          setTargetComponentIndex(targetComponentIndex + 1);
 
-        table.insert(visibleComponents, possibleComponent);
+        end;
 
       end;
 
-    else
+      local typewriterCharacterDelay = if shouldSkip then 0 else dialogue.settings.typewriter.characterDelaySeconds or conversation.settings.typewriter.characterDelaySeconds or client.settings.typewriter.characterDelaySeconds;
+      local componentKey = `{dialogue}.{currentComponentIndex}`;
+      local component = dialogueContent[currentComponentIndex];
 
-      warn(`Unsupported component type at component {currentComponentIndex}. Expected string or table, got {typeof(component)}.`);
-      continuePage();
+      if typeof(component) == "string" then
+        
+        local textSegment = React.createElement(MessageText, {
+          text = component;
+          client = client;
+          skipPageSignal = skipPageEvent.Event;
+          layoutOrder = currentComponentIndex;
+          textSize = textSize;
+          key = componentKey;
+          lineHeight = lineHeight;
+          letterDelay = typewriterCharacterDelay;
+          onComplete = continuePage;
+        });
+
+        table.insert(visibleComponents, textSegment);
+
+      elseif typeof(component) == "table" then
+
+        local possibleComponent = component:run({
+          client = client;
+          shouldSkip = shouldSkip or targetComponentIndex > currentComponentIndex;
+          skipPageSignal = skipPageEvent.Event;
+          key = componentKey;
+          textComponentProperties = {
+            layoutOrder = currentComponentIndex;
+            letterDelay = typewriterCharacterDelay;
+            lineHeight = lineHeight;
+            textSize = textSize;
+          } :: MessageTextProperties;
+          continuePage = continuePage;
+          textComponent = MessageText;
+        });
+
+        if possibleComponent then
+
+          table.insert(visibleComponents, possibleComponent);
+
+        end;
+
+      else
+
+        warn(`Unsupported component type at component {currentComponentIndex}. Expected string or table, got {typeof(component)}.`);
+        continuePage();
+
+      end;
 
     end;
 
-  end;
+    return visibleComponents;
+
+  end, {dialogueContent :: unknown, targetComponentIndex, shouldSkip, dialogue, conversation, client, skipPageEvent});
 
   return React.createElement("Frame", {
     AnchorPoint = Vector2.new(0.5, 0);
