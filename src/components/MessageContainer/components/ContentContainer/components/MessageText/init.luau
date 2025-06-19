@@ -5,74 +5,37 @@
 -- Programmer: Christian Toney (Christian_Toney)
 -- © 2025 Dialogue Maker Group
 
-local packages = script.Parent.Parent.Parent.Parent.roblox_packages;
+local packages = script.Parent.Parent.Parent.Parent.Parent.Parent.Parent.roblox_packages;
 local React = require(packages.react);
 local DialogueMakerTypes = require(packages.DialogueMakerTypes);
-local DialogueContentFitter = require(packages.dialogue_content_fitter);
-
-local useTypewriter = require(packages.use_typewriter);
+local useMinimumTextHeight = require(script.hooks.useMinimumTextHeight);
+local useTypewriter = require(packages.useTypewriter);
 
 type Client = DialogueMakerTypes.Client;
 
 export type MessageTextProperties = {
   text: string;
-  skipPageSignal: RBXScriptSignal?;
+  skipPageSignal: RBXScriptSignal;
   letterDelay: number;
   layoutOrder: number;
   textSize: number;
   onComplete: () -> ();
   lineHeight: number;
-  client: Client;
 }
 
 local function MessageText(properties: MessageTextProperties)
 
   local text = properties.text;
   local lineHeight = properties.lineHeight;
+  local textSize = properties.textSize;
+  local textLabelRef = React.useRef(nil :: TextLabel?);
+  local minimumHeight = useMinimumTextHeight(textLabelRef, lineHeight, text);
   local maxVisibleGraphemes = useTypewriter({
     text = text;
     letterDelay = properties.letterDelay;
     onComplete = properties.onComplete;
     skipPageSignal = properties.skipPageSignal;
   });
-  local minimumHeight = React.useMemo(function()
-
-    local textLabel = Instance.new("TextLabel");
-    
-    local lineBreaks = DialogueContentFitter:getLineBreakIndices(textLabel);
-    return (#lineBreaks + 1) * properties.textSize * lineHeight;
-  
-  end, {text :: unknown, properties.textSize, lineHeight});
-
-  local client = properties.client;
-  local dialogue = client.dialogue;
-  local conversation = client.conversation;
-
-  local textLabelRef = React.useRef(nil :: TextLabel?);
-  React.useEffect(function(): ()
-  
-    local textLabel = textLabelRef.current;
-    local typewriterSoundTemplate = dialogue.settings.typewriter.soundTemplate or conversation.settings.typewriter.soundTemplate or client.settings.typewriter.soundTemplate;
-    if textLabel and typewriterSoundTemplate then
-
-      local typewriterSound = typewriterSoundTemplate:Clone();
-      typewriterSound.Parent = textLabel;
-      typewriterSound.Ended:Once(function()
-        
-        typewriterSound:Destroy();
-
-      end);
-      typewriterSound:Play();
-
-      return function()
-
-        typewriterSound:Destroy();
-
-      end;
-
-    end;
-
-  end, {maxVisibleGraphemes :: unknown, client, dialogue, conversation});
 
   return React.createElement("TextLabel", {
     AutomaticSize = Enum.AutomaticSize.XY;
@@ -80,7 +43,7 @@ local function MessageText(properties: MessageTextProperties)
     MaxVisibleGraphemes = maxVisibleGraphemes;
     LayoutOrder = properties.layoutOrder;
     FontFace = Font.fromName("BuilderSans", Enum.FontWeight.Regular);
-    TextSize = properties.textSize;
+    TextSize = textSize;
     LineHeight = lineHeight;
     BackgroundTransparency = 1;
     TextXAlignment = Enum.TextXAlignment.Left;
@@ -98,4 +61,4 @@ local function MessageText(properties: MessageTextProperties)
 
 end;
 
-return MessageText;
+return React.memo(MessageText);

@@ -9,6 +9,7 @@ includes = [
   "README.md",
   "LICENSE",
   "src/**/*.lua",
+  "src/**/*.luau",
 ]
 
 [target]
@@ -39,10 +40,8 @@ luau_lsp = { name = "pesde/luau_lsp", version = "^1.48.0", target = "lune" }
 react = { wally = "jsdotlua/react", version = "^17.2.1" }
 
 [dependencies]
-use_dynamic_size = { name = "dialoguemaker/use_dynamic_size", version = "^0.1.0-patch-2" }
-useKeybindContinue = { name = "dialoguemaker/use_keybind_continue", version = "^0.1.4" }
-use_pages = { name = "dialoguemaker/use_pages", version = "^0.1.0" }
-use_responses = { name = "dialoguemaker/use_responses", version = "^0.1.2" }
-use_typewriter = { name = "dialoguemaker/use_typewriter", version = "^0.1.0" }
-dialogue_content_fitter = { name = "dialoguemaker/dialogue_content_fitter", version = "^0.1.0" }
-DialogueMakerTypes = { name = "dialoguemaker/types", version = "^0.1.25" }
+useDynamicSize = { name = "dialoguemaker/use_dynamic_size", version = "^0.1.0-patch-2" }
+useKeybindContinue = { name = "dialoguemaker/use_keybind_continue", version = "^0.1.6" }
+useResponses = { name = "dialoguemaker/use_responses", version = "^0.1.3" }
+useTypewriter = { name = "dialoguemaker/use_typewriter", version = "^0.1.0" }
+DialogueMakerTypes = { name = "dialoguemaker/types", version = "^0.1.28" }

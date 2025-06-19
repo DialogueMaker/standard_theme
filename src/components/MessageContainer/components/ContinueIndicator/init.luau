@@ -7,7 +7,7 @@
 
 local TweenService = game:GetService("TweenService");
 
-local packages = script.Parent.Parent.Parent.roblox_packages;
+local packages = script.Parent.Parent.Parent.Parent.Parent.roblox_packages;
 local React = require(packages.react);
 
 local function ContinueIndicator()
@@ -67,4 +67,4 @@ local function ContinueIndicator()
 
 end;
 
-return ContinueIndicator;
+return React.memo(ContinueIndicator);

@@ -1,10 +1,10 @@
 --!strict
 
-local packages = script.Parent.Parent.roblox_packages;
+local packages = script.Parent.Parent.Parent.roblox_packages;
 local React = require(packages.react);
 local DialogueMakerTypes = require(packages.DialogueMakerTypes);
 
-local ResponseButton = require(script.ResponseButton);
+local ResponseButton = require(script.components.ResponseButton);
 
 type Dialogue = DialogueMakerTypes.Dialogue;
 
@@ -62,4 +62,4 @@ local function ResponseComponentList(props: ResponseComponentListProperties)
 
 end;
 
-return ResponseComponentList;
+return React.memo(ResponseComponentList);

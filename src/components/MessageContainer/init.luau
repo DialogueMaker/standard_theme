@@ -5,14 +5,15 @@
 -- Programmer: Christian Toney (Christian_Toney)
 -- © 2023 – 2025 Dialogue Maker Group
 
-local packages = script.Parent.Parent.roblox_packages;
+local packages = script.Parent.Parent.Parent.roblox_packages;
 local React = require(packages.react);
 local DialogueMakerTypes = require(packages.DialogueMakerTypes);
-
-local ContinueIndicator = require(script.ContinueIndicator);
-local NameTag = require(script.NameTag);
-local ContentContainer = require(script.ContentContainer);
+local ContinueIndicator = require(script.components.ContinueIndicator);
+local NameTag = require(script.components.NameTag);
+local ContentContainer = require(script.components.ContentContainer);
 local useKeybindContinue = require(packages.useKeybindContinue);
+local useContinueDialogueBindableFunction = require(script.hooks.useContinueDialogueBindableFunction);
+local useNextMessage = require(script.hooks.useNextMessage);
 
 type Client = DialogueMakerTypes.Client;
 type Page = DialogueMakerTypes.Page;
@@ -20,33 +21,28 @@ type Dialogue = DialogueMakerTypes.Dialogue;
 type DialogueSettings = DialogueMakerTypes.DialogueSettings;
 
 export type MessageContainerProperties = {
-  currentPageIndex: number;
   skipPageEvent: BindableEvent;
   onPageFinished: () -> ();
   onTypingFinished: () -> ();
   isTypingFinished: boolean;
   client: Client;
-  themeWidth: number;
-  pages: {Page};
-  lineHeight: number;
-  textSize: number;
-  height: number;
-  padding: number;
 }
 
 local function MessageContainer(properties: MessageContainerProperties)
 
-  local currentPageIndex = properties.currentPageIndex;
   local skipPageEvent = properties.skipPageEvent;
   local isTypingFinished = properties.isTypingFinished;
   local client = properties.client;
   local dialogue = client.dialogue;
   local conversation = client.conversation;
   local onPageFinished = properties.onPageFinished;
+  local nextMessage = useNextMessage(dialogue);
 
-  -- Allow external scripts to skip pages and continue the dialogue outside of the theme.
+  local height = 75;
+  local padding = 15;
+  local speakerName = dialogue.settings.speaker.name or conversation.settings.speaker.name;
+  
   local canPlayerSkipDelay = dialogue.settings.typewriter.canPlayerSkipDelay;
-
   local continueDialogue = React.useCallback(function()
 
     if isTypingFinished then
@@ -61,42 +57,11 @@ local function MessageContainer(properties: MessageContainerProperties)
 
   end, {isTypingFinished :: unknown, canPlayerSkipDelay, skipPageEvent, onPageFinished});
 
-  React.useEffect(function()
-  
-    client.continueDialogueBindableFunction.OnInvoke = continueDialogue;
-
-    return function()
-
-      client.continueDialogueBindableFunction.OnInvoke = function() end;
-
-    end;
-
-  end, {client});
-  
-  -- Outsource keybind support.
   useKeybindContinue(client, continueDialogue);
-
-  local doesNextDialogueExist = React.useMemo(function()
-    
-    local children = dialogue:getChildren();
-    for _, child in children do
-
-      if child.type == "Message" and child:verifyCondition() then
-
-        return true;
-
-      end;
-
-    end;
-
-    return false;
-    
-  end, {dialogue});
-  
-  local speakerName = dialogue.settings.speaker.name or conversation.settings.speaker.name;
+  useContinueDialogueBindableFunction(client, continueDialogue);
 
   return React.createElement("Frame", {
-    Size = UDim2.new(1, 0, 0, properties.height);
+    Size = UDim2.new(1, 0, 0, height);
     BackgroundColor3 = Color3.fromHex("#202020");
     BackgroundTransparency = 0.2;
     [React.Event.InputBegan] = function(self: Frame, input: InputObject)
@@ -110,34 +75,28 @@ local function MessageContainer(properties: MessageContainerProperties)
     end;
   }, {
     UIPadding = React.createElement("UIPadding", {
-      PaddingLeft = UDim.new(0, properties.padding);
-      PaddingTop = UDim.new(0, properties.padding);
-      PaddingRight = UDim.new(0, properties.padding);
-      PaddingBottom = UDim.new(0, properties.padding);
+      PaddingLeft = UDim.new(0, padding);
+      PaddingTop = UDim.new(0, padding);
+      PaddingRight = UDim.new(0, padding);
+      PaddingBottom = UDim.new(0, padding);
     });
     UICorner = React.createElement("UICorner", {
       CornerRadius = UDim.new(0, 5);
     });
     NameTag = if speakerName then React.createElement(NameTag, {
       speakerName = speakerName;
-      parentPadding = properties.padding;
+      parentPadding = padding;
     }) else nil;
     ContentContainer = React.createElement(ContentContainer, {
       client = client;
-      conversation = conversation;
-      pages = properties.pages;
-      currentPageIndex = currentPageIndex;
       skipPageEvent = skipPageEvent;
-      themeWidth = properties.themeWidth;
       onTypingFinished = properties.onTypingFinished;
-      lineHeight = properties.lineHeight;
-      textSize = properties.textSize;
     });
-    ContinueIndicator = if properties.isTypingFinished and (properties.currentPageIndex < #properties.pages or doesNextDialogueExist) then
+    ContinueIndicator = if properties.isTypingFinished and nextMessage ~= nil then
       React.createElement(ContinueIndicator)
     else nil;
   });
 
 end;
 
-return MessageContainer;
+return React.memo(MessageContainer);

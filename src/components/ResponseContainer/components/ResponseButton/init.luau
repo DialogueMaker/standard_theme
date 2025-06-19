@@ -1,6 +1,6 @@
 --!strict
 
-local packages = script.Parent.Parent.Parent.roblox_packages;
+local packages = script.Parent.Parent.Parent.Parent.Parent.roblox_packages;
 local React = require(packages.react);
 
 export type ResponseProperties = {
@@ -38,4 +38,4 @@ local function ResponseButton(props: ResponseProperties)
 
 end;
 
-return ResponseButton;
+return React.memo(ResponseButton);

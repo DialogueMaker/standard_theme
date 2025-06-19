@@ -4,7 +4,7 @@
 -- Programmer: Christian Toney (Christian_Toney)
 -- © 2025 Dialogue Maker Group
 
-local packages = script.Parent.Parent.Parent.roblox_packages;
+local packages = script.Parent.Parent.Parent.Parent.Parent.roblox_packages;
 local React = require(packages.react);
 
 export type NameTagProperties = {
@@ -38,4 +38,4 @@ local function NameTag(properties: NameTagProperties)
 
 end;
 
-return NameTag;
+return React.memo(NameTag);
