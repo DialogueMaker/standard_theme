@@ -24,13 +24,13 @@ export type ContentContainerProperties = {
 
 local function ContentContainer(properties: ContentContainerProperties)
 
-  local lineHeight = 1.25;
-  local textSize = 20;
-
   local client = properties.client;
   local dialogue = client.dialogue;
   local conversation = client.conversation;
   local skipPageEvent = properties.skipPageEvent;
+
+  local lineHeight = 1.25;
+  local textSize = 20;
 
   local shouldSkip, setShouldSkip = React.useState(false);
   useSkipPageSignal(skipPageEvent.Event, setShouldSkip);
@@ -51,6 +51,8 @@ local function ContentContainer(properties: ContentContainerProperties)
    
   end, {dialogue});
 
+  -- Render the components one by one, starting from the first component.
+  -- This prevents the entire page from being rendered at once, which can cause unexpected behavior.
   local visibleComponents = React.useMemo(function()
 
     local visibleComponents: {React.ReactNode} = {};

@@ -24,10 +24,22 @@ local function StandardTheme(properties: ThemeProperties)
   local dialogue = client.dialogue;
   
   -- Choose a width based on the device type.
-  local phoneWidth = 310;
-  local tabletWidth = 500;
-  local canUseTabletWidth = useDynamicSize(client.dialogueGUI, 736);
-  local width = if canUseTabletWidth then tabletWidth else phoneWidth;
+  local anchorPoint = Vector2.zero;
+  local position = UDim2.new();
+  local size = UDim2.fromScale(1, 1);
+
+  if client.dialogueGUI:IsA("ScreenGui") then
+
+    anchorPoint = Vector2.new(0.5, 1);
+    position = UDim2.new(0.5, 0, 1, -15);
+
+    local phoneWidth = 310;
+    local tabletWidth = 500;
+    local canUseTabletWidth = useDynamicSize(client.dialogueGUI, 736);
+    local width = if canUseTabletWidth then tabletWidth else phoneWidth;
+    size = UDim2.fromOffset(width, 0);
+
+  end;
 
   local isTypingFinished, setIsTypingFinished = React.useState(false);
   React.useEffect(function()
@@ -47,10 +59,9 @@ local function StandardTheme(properties: ThemeProperties)
   end;
 
   return React.createElement("Frame", {
-    AnchorPoint = Vector2.new(0.5, 1);
-    Position = UDim2.new(0.5, 0, 1, -15);
-    AutomaticSize = Enum.AutomaticSize.Y;
-    Size = UDim2.fromOffset(width, 0);
+    AnchorPoint = anchorPoint;
+    Position = position;
+    Size = size;
     BackgroundTransparency = 1;
   }, {
     UIListLayout = React.createElement("UIListLayout", {

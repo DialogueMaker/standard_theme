@@ -43,9 +43,15 @@ local function MessageContainer(properties: MessageContainerProperties)
 
   end, {});
 
-  local height = 75;
+  local size = UDim2.fromScale(1, 1);
   local padding = 15;
   local speakerName = dialogue.settings.speaker.name or conversation.settings.speaker.name;
+
+  if client.dialogueGUI:IsA("ScreenGui") then
+
+    size = UDim2.new(1, 0, 0, 75);
+
+  end;
   
   local canPlayerSkipDelay = dialogue.settings.typewriter.canPlayerSkipDelay;
   local continueDialogue = React.useCallback(function()
@@ -66,7 +72,7 @@ local function MessageContainer(properties: MessageContainerProperties)
   useContinueDialogueBindableFunction(client, continueDialogue);
 
   return React.createElement("Frame", {
-    Size = UDim2.new(1, 0, 0, height);
+    Size = size;
     BackgroundColor3 = Color3.fromHex("#202020");
     BackgroundTransparency = 0.2;
     [React.Event.InputBegan] = function(self: Frame, input: InputObject)
