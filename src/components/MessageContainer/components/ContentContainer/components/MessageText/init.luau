@@ -19,7 +19,7 @@ export type MessageTextProperties = {
   letterDelay: number;
   layoutOrder: number;
   textSize: number;
-  onComplete: () -> ();
+  onCompleted: () -> ();
   lineHeight: number;
 }
 
@@ -33,7 +33,7 @@ local function MessageText(properties: MessageTextProperties)
   local maxVisibleGraphemes = useTypewriter({
     text = text;
     letterDelay = properties.letterDelay;
-    onComplete = properties.onComplete;
+    onComplete = properties.onCompleted;
     skipPageSignal = properties.skipPageSignal;
   });
 

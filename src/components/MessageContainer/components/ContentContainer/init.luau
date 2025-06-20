@@ -9,6 +9,7 @@ local React = require(packages.react);
 local DialogueMakerTypes = require(packages.DialogueMakerTypes);
 local MessageText = require(script.components.MessageText);
 local useSkipPageSignal = require(script.hooks.useSkipPageSignal);
+local useIterativeContent = require(packages.useIterativeContent);
 
 type Client = DialogueMakerTypes.Client;
 type Conversation = DialogueMakerTypes.Conversation;
@@ -28,21 +29,13 @@ local function ContentContainer(properties: ContentContainerProperties)
   local dialogue = client.dialogue;
   local conversation = client.conversation;
   local skipPageEvent = properties.skipPageEvent;
+  local onTypingFinished = properties.onTypingFinished;
 
   local lineHeight = 1.25;
   local textSize = 20;
 
   local shouldSkip, setShouldSkip = React.useState(false);
   useSkipPageSignal(skipPageEvent.Event, setShouldSkip);
-
-  -- Reset the target component index when the page changes for a blank slate.
-  local targetComponentIndex, setTargetComponentIndex = React.useState(1);
-
-  React.useEffect(function(): ()
-
-    setTargetComponentIndex(1);
-
-  end, {dialogue});
 
   -- Memoize the dialogue content to avoid calling getContent() on every render.
   local dialogueContent = React.useMemo(function()
@@ -53,85 +46,31 @@ local function ContentContainer(properties: ContentContainerProperties)
 
   -- Render the components one by one, starting from the first component.
   -- This prevents the entire page from being rendered at once, which can cause unexpected behavior.
-  local visibleComponents = React.useMemo(function()
+  local typewriterCharacterDelay = if shouldSkip then 0 else dialogue.settings.typewriter.characterDelaySeconds or conversation.settings.typewriter.characterDelaySeconds or client.settings.typewriter.characterDelaySeconds;
+  local createTextElement = React.useCallback(function(textElementProperties: DialogueMakerTypes.TextElementProperties)
 
-    local visibleComponents: {React.ReactNode} = {};
+    return React.createElement(MessageText, {
+      text = textElementProperties.text;
+      client = client;
+      skipPageSignal = skipPageEvent.Event;
+      layoutOrder = textElementProperties.layoutOrder or 1;
+      textSize = textSize;
+      key = textElementProperties.key;
+      lineHeight = lineHeight;
+      letterDelay = typewriterCharacterDelay;
+      onCompleted = textElementProperties.onCompleted;
+    });
 
-    for currentComponentIndex = 1, targetComponentIndex do
-      
-      --[[
-        Re-renders the content container with a new page or the next component in the current page.
-      ]]
-      local function continuePage()
+  end, {lineHeight, textSize, typewriterCharacterDelay});
 
-        if currentComponentIndex >= #dialogueContent then
+  local continuePage = React.useCallback(function()
 
-          setShouldSkip(false);
-          properties.onTypingFinished();
+    setShouldSkip(false);
+    onTypingFinished();
 
-        elseif currentComponentIndex == targetComponentIndex then
-
-          setTargetComponentIndex(targetComponentIndex + 1);
-
-        end;
-
-      end;
-
-      local typewriterCharacterDelay = if shouldSkip then 0 else dialogue.settings.typewriter.characterDelaySeconds or conversation.settings.typewriter.characterDelaySeconds or client.settings.typewriter.characterDelaySeconds;
-      local componentKey = `{dialogue}.{currentComponentIndex}`;
-      local component = dialogueContent[currentComponentIndex];
-
-      if typeof(component) == "string" then
-        
-        local textSegment = React.createElement(MessageText, {
-          text = component;
-          client = client;
-          skipPageSignal = skipPageEvent.Event;
-          layoutOrder = currentComponentIndex;
-          textSize = textSize;
-          key = componentKey;
-          lineHeight = lineHeight;
-          letterDelay = typewriterCharacterDelay;
-          onComplete = continuePage;
-        });
-
-        table.insert(visibleComponents, textSegment);
-
-      elseif typeof(component) == "table" then
-
-        local possibleComponent = component:run({
-          client = client;
-          shouldSkip = shouldSkip or targetComponentIndex > currentComponentIndex;
-          skipPageSignal = skipPageEvent.Event;
-          key = componentKey;
-          textComponentProperties = {
-            layoutOrder = currentComponentIndex;
-            letterDelay = typewriterCharacterDelay;
-            lineHeight = lineHeight;
-            textSize = textSize;
-          } :: MessageTextProperties;
-          continuePage = continuePage;
-          textComponent = MessageText;
-        });
-
-        if possibleComponent then
-
-          table.insert(visibleComponents, possibleComponent);
-
-        end;
-
-      else
-
-        warn(`Unsupported component type at component {currentComponentIndex}. Expected string or table, got {typeof(component)}.`);
-        continuePage();
-
-      end;
-
-    end;
-
-    return visibleComponents;
-
-  end, {dialogueContent :: unknown, targetComponentIndex, shouldSkip, dialogue, conversation, client, skipPageEvent});
+  end, {onTypingFinished});
+  
+  local iterativeContent = useIterativeContent(dialogueContent, client, skipPageEvent.Event, shouldSkip, createTextElement, continuePage);
 
   return React.createElement("Frame", {
     AnchorPoint = Vector2.new(0.5, 0);
@@ -144,7 +83,7 @@ local function ContentContainer(properties: ContentContainerProperties)
       FillDirection = Enum.FillDirection.Horizontal;
       Wraps = true;
     });
-    MessageComponentList = React.createElement(React.Fragment, {}, visibleComponents);
+    MessageComponentList = React.createElement(React.Fragment, {}, iterativeContent);
   });
 
 end;
