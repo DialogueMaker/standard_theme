@@ -14,9 +14,18 @@ local function useMessage(client: Client)
     if dialogue.type ~= "Message" then
 
       local nextDialogue = dialogue:findNextVerifiedDialogue();
-      client:clone({
-        dialogue = nextDialogue;
-      });
+
+      if nextDialogue then
+        
+        client:clone({
+          dialogue = nextDialogue;
+        });
+
+      else
+
+        client:cleanup();
+
+      end;
 
       return;
 
