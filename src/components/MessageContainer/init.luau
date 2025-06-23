@@ -14,6 +14,7 @@ local ContentContainer = require(script.components.ContentContainer);
 local useKeybindContinue = require(packages.useKeybindContinue);
 local useContinueDialogueBindableFunction = require(script.hooks.useContinueDialogueBindableFunction);
 local useNextMessage = require(script.hooks.useNextMessage);
+local useSetting = require(script.Parent.Parent.hooks.useSetting);
 
 type Client = DialogueMakerTypes.Client;
 type Page = DialogueMakerTypes.Page;
@@ -45,7 +46,7 @@ local function MessageContainer(properties: MessageContainerProperties)
 
   local size = UDim2.fromScale(1, 1);
   local padding = 15;
-  local speakerName = dialogue.settings.speaker.name or conversation.settings.speaker.name;
+  local speakerName = useSetting(dialogue.settings.speaker.name, conversation.settings.speaker.name);
 
   if client.dialogueGUI:IsA("ScreenGui") then
 
@@ -53,7 +54,7 @@ local function MessageContainer(properties: MessageContainerProperties)
 
   end;
   
-  local canPlayerSkipDelay = dialogue.settings.typewriter.canPlayerSkipDelay;
+  local canPlayerSkipDelay = useSetting(dialogue.settings.typewriter.canPlayerSkipDelay, conversation.settings.typewriter.canPlayerSkipDelay, client.settings.typewriter.canPlayerSkipDelay);
   local continueDialogue = React.useCallback(function()
 
     if isTypingFinished then

@@ -1,0 +1,32 @@
+name: Publish new version to pesde registry
+
+on:
+  workflow_dispatch:
+  release:
+    types: [released, prereleased]
+
+concurrency:
+  group: ${{ github.workflow }}
+
+jobs:
+  build:
+    name: Build project
+    runs-on: ubuntu-24.04
+    environment: Production
+    timeout-minutes: 1
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4.1.7
+
+      - name: Set up pesde
+        uses: ernisto/setup-pesde@5f9a3399d5ae0fe78b014f5f13cd913f27755fb4
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          token: ${{ secrets.PESDE_TOKEN }}
+
+      - name: Install dependencies
+        run: pesde install
+
+      - name: Publish to pesde registry
+        run: pesde publish -y

@@ -1,0 +1,19 @@
+{
+  "name": "Dialogue",
+  "tree": {
+    "$className": "DataModel",
+    "ReplicatedStorage": {
+      "StandardTheme": {
+        "$className": "Folder",
+        "roblox_packages": {
+          "$path": {
+            "optional": "roblox_packages"
+          }
+        },
+        "src": {
+          "$path": "src"
+        }
+      }
+    }
+  }
+}

@@ -15,6 +15,7 @@ local useResponses = require(packages.useResponses);
 local useDynamicSize = require(packages.useDynamicSize);
 local useInitializationAction = require(script.hooks.useInitializationAction);
 local useMessage = require(script.hooks.useMessage);
+local useSetting = require(script.hooks.useSetting);
 
 type ThemeProperties = DialogueMakerTypes.ThemeProperties;
 
@@ -25,6 +26,7 @@ local function StandardTheme(properties: ThemeProperties)
   
   -- Choose a width based on the device type.
   local anchorPoint = Vector2.zero;
+  local automaticSize = Enum.AutomaticSize.None;
   local position = UDim2.new();
   local size = UDim2.fromScale(1, 1);
 
@@ -32,6 +34,7 @@ local function StandardTheme(properties: ThemeProperties)
 
     anchorPoint = Vector2.new(0.5, 1);
     position = UDim2.new(0.5, 0, 1, -15);
+    automaticSize = Enum.AutomaticSize.Y;
 
     local phoneWidth = 310;
     local tabletWidth = 500;
@@ -51,6 +54,8 @@ local function StandardTheme(properties: ThemeProperties)
   local didRunInitializationAction = useInitializationAction(client);
   local message = useMessage(client);
   local responses = useResponses(dialogue);
+  local conversation = client.conversation;
+  local shouldShowResponseWhileTyping = useSetting(dialogue.settings.typewriter.shouldShowResponseWhileTyping, conversation.settings.typewriter.shouldShowResponseWhileTyping, client.settings.typewriter.shouldShowResponseWhileTyping) :: boolean;
 
   if not didRunInitializationAction or not message then
 
@@ -60,6 +65,7 @@ local function StandardTheme(properties: ThemeProperties)
 
   return React.createElement("Frame", {
     AnchorPoint = anchorPoint;
+    AutomaticSize = automaticSize;
     Position = position;
     Size = size;
     BackgroundTransparency = 1;
@@ -88,7 +94,7 @@ local function StandardTheme(properties: ThemeProperties)
 
       end;
     });
-    ResponseContainer = if #responses > 0 and (not dialogue.settings.typewriter.shouldShowResponseWhileTyping or isTypingFinished) then 
+    ResponseContainer = if #responses > 0 and (not shouldShowResponseWhileTyping or isTypingFinished) then 
       React.createElement(ResponseContainer, {
         responses = responses;
         onComplete = function(requestedDialogue)

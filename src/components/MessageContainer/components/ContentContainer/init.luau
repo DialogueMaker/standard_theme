@@ -10,6 +10,7 @@ local DialogueMakerTypes = require(packages.DialogueMakerTypes);
 local MessageText = require(script.components.MessageText);
 local useSkipPageSignal = require(script.hooks.useSkipPageSignal);
 local useIterativeContent = require(packages.useIterativeContent);
+local useSetting = require(script.Parent.Parent.Parent.Parent.hooks.useSetting);
 
 type Client = DialogueMakerTypes.Client;
 type Conversation = DialogueMakerTypes.Conversation;
@@ -46,7 +47,8 @@ local function ContentContainer(properties: ContentContainerProperties)
 
   -- Render the components one by one, starting from the first component.
   -- This prevents the entire page from being rendered at once, which can cause unexpected behavior.
-  local typewriterCharacterDelay = if shouldSkip then 0 else dialogue.settings.typewriter.characterDelaySeconds or conversation.settings.typewriter.characterDelaySeconds or client.settings.typewriter.characterDelaySeconds;
+  local typewriterCharacterDelay = useSetting(dialogue.settings.typewriter.characterDelaySeconds, conversation.settings.typewriter.characterDelaySeconds, client.settings.typewriter.characterDelaySeconds) :: number;
+  typewriterCharacterDelay = if shouldSkip then 0 else typewriterCharacterDelay;
   local createTextElement = React.useCallback(function(textElementProperties: DialogueMakerTypes.TextElementProperties)
 
     return React.createElement(MessageText, {
