@@ -56,12 +56,14 @@ return {
     local function createMockEffect(text: string)
 
       return {
+        type = "Effect" :: "Effect";
         run = function(self, properties)
 
           properties.onCompleted();
 
           return React.createElement("TextLabel", {
             Text = text;
+            LayoutOrder = properties.layoutOrder;
           });
 
         end;
@@ -69,18 +71,30 @@ return {
 
     end;
 
-    local function preventRaceCondition(continueEvent: BindableEvent)
+    local function MockComponent(properties)
 
-      local timeoutTask = task.delay(1, function()
+      local isTypingFinished, setIsTypingFinished = React.useState(false);
 
-        continueEvent:Fire();
+      React.useEffect(function()
 
-      end);
+        if isTypingFinished then
 
-      continueEvent.Event:Wait();
+          properties.continueEvent:Fire();
+          
+        end;
+
+      end, {isTypingFinished});
+
+      return React.createElement(ContentContainer, {
+        client = properties.client;
+        skipPageEvent = Instance.new("BindableEvent");
+        onTypingFinished = function()
         
-      task.cancel(timeoutTask);
-      
+          setIsTypingFinished(true);
+
+        end;
+      });
+
     end;
 
     return {
@@ -94,20 +108,13 @@ return {
         local mockClient = createMockClient({"Hello world!"});
         local continueEvent = Instance.new("BindableEvent");
 
-        reactRoot:render(React.createElement(ContentContainer, {
+        reactRoot:render(React.createElement(MockComponent, {
           client = mockClient;
-          skipPageEvent = Instance.new("BindableEvent");
-          onTypingFinished = function() 
-            
-            continueEvent:Fire();
-
-          end;
+          continueEvent = continueEvent;
         }));
 
         -- Wait for the typing to finish.
-        -- Multithreading may cause the typing to finish before we hook to the event,
-        -- so we use a timeout to force the execution to continue.
-        preventRaceCondition(continueEvent);
+        continueEvent.Event:Wait();
 
         -- Check if the text is on screen.
         local contentContainer = screenGui:FindFirstChildOfClass("Frame");
@@ -126,23 +133,16 @@ return {
 
         -- Render the ContentContainer.
         local mockEffect = createMockEffect("This was created by an effect.");
-        local mockClient = createMockClient(mockEffect);
+        local mockClient = createMockClient({mockEffect});
         local continueEvent = Instance.new("BindableEvent");
 
-        reactRoot:render(React.createElement(ContentContainer, {
+        reactRoot:render(React.createElement(MockComponent, {
           client = mockClient;
-          skipPageEvent = Instance.new("BindableEvent");
-          onTypingFinished = function() 
-            
-            continueEvent:Fire();
-
-          end;
+          continueEvent = continueEvent;
         }));
 
         -- Wait for the typing to finish.
-        -- Multithreading may cause the typing to finish before we hook to the event,
-        -- so we use a timeout to force the execution to continue.
-        preventRaceCondition(continueEvent);
+        continueEvent.Event:Wait();
 
         -- Check if the text is on screen.
         local contentContainer = screenGui:FindFirstChildOfClass("Frame");
@@ -163,35 +163,31 @@ return {
         local mockClient = createMockClient({"1", "2", createMockEffect("3"), "4"} :: Page);
         local continueEvent = Instance.new("BindableEvent");
 
-        reactRoot:render(React.createElement(ContentContainer, {
+        reactRoot:render(React.createElement(MockComponent, {
           client = mockClient;
-          skipPageEvent = Instance.new("BindableEvent");
-          onTypingFinished = function() 
-            
-            continueEvent:Fire();
-
-          end;
+          continueEvent = continueEvent;
         }));
 
         -- Wait for the typing to finish.
-        -- Multithreading may cause the typing to finish before we hook to the event,
-        -- so we use a timeout to force the execution to continue.
-        preventRaceCondition(continueEvent);
+        continueEvent.Event:Wait();
         
         -- Check if the text is on screen.
         local contentContainer = screenGui:FindFirstChildOfClass("Frame");
         assert(contentContainer, "ContentContainer should be created.");
-        expect(#contentContainer:GetChildren()).toBe(4);
 
+        local textLabels = {};
         for _, child in contentContainer:GetChildren() do
 
           if child:IsA("TextLabel") then
 
             expect(child.Text).toBe(`{child.LayoutOrder}`);
+            table.insert(textLabels, child);
 
           end;
 
         end;
+
+        expect(#textLabels).toBe(4);
 
       end);
 
@@ -207,15 +203,15 @@ return {
     end;
     afterEach = function()
 
-      if screenGui then
-
-        screenGui:Destroy();
-
-      end;
-
       if reactRoot then
 
         reactRoot:unmount();
+
+      end;
+
+      if screenGui then
+
+        screenGui:Destroy();
 
       end;
 
