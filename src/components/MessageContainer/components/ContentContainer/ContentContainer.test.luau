@@ -20,7 +20,7 @@ local reactRoot: ReactRoblox.RootType?;
 return {
   describe("ContentContainer", function()
 
-    local function createMockClient(page: Page?)
+    local function createMockClient(page: Page?, characterDelaySeconds: number?)
 
       local mockClient = {
         settings = {
@@ -31,7 +31,7 @@ return {
         dialogue = {
           settings = {
             typewriter = {
-              characterDelaySeconds = 0;
+              characterDelaySeconds = if characterDelaySeconds then characterDelaySeconds else 0;
             };
           } :: DialogueMakerTypes.DialogueSettings;
           getContent = if page then function()
@@ -71,23 +71,34 @@ return {
 
     end;
 
-    local function MockComponent(properties)
+    local function MockComponent(properties: any)
 
       local isTypingFinished, setIsTypingFinished = React.useState(false);
+      local onRendered = properties.onRendered;
+
+      React.useEffect(function()
+      
+        if onRendered then
+
+          onRendered();
+
+        end;
+
+      end, {onRendered});
 
       React.useEffect(function()
 
         if isTypingFinished then
 
           properties.continueEvent:Fire();
-          
+
         end;
 
       end, {isTypingFinished});
 
       return React.createElement(ContentContainer, {
         client = properties.client;
-        skipPageEvent = Instance.new("BindableEvent");
+        skipPageEvent = properties.skipPageEvent or Instance.new("BindableEvent");
         onTypingFinished = function()
         
           setIsTypingFinished(true);
@@ -188,6 +199,51 @@ return {
         end;
 
         expect(#textLabels).toBe(4);
+
+      end);
+
+      it("can immediately reveal message on request", function()
+
+        assert(screenGui, "ScreenGui should be initialized.");
+        assert(reactRoot, "React root should be initialized.");
+
+        -- Render the ContentContainer.
+        local mockClient = createMockClient({"Lorem ipsum dolor sit amet", " consectetur adipiscing elit"}, 9999);
+        local continueEvent = Instance.new("BindableEvent");
+        local skipPageEvent = Instance.new("BindableEvent");
+
+        reactRoot:render(React.createElement(MockComponent, {
+          client = mockClient;
+          continueEvent = continueEvent;
+          skipPageEvent = skipPageEvent;
+          onRendered = function()
+            
+            -- Realistically, the user can click at any time to skip the typing.
+            skipPageEvent:Fire();
+
+          end;
+        }));
+
+        -- Wait for the typing to finish.
+        continueEvent.Event:Wait();
+
+        -- Check if the text is on screen.
+        local contentContainer = screenGui:FindFirstChildOfClass("Frame");
+        assert(contentContainer, "ContentContainer should be created.");
+
+        local textLabels = {};
+        for _, child in contentContainer:GetChildren() do
+
+          if child:IsA("TextLabel") then
+
+            expect(child.MaxVisibleGraphemes).toBe(-1);
+            table.insert(textLabels, child);
+
+          end;
+
+        end;
+
+        expect(#textLabels).toBe(2);
 
       end);
 
