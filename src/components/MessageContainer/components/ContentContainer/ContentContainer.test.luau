@@ -183,13 +183,14 @@ return {
         end;
 
       end);
-      
+
     };
 
   end, {
     beforeAll = function()
     
       screenGui = Instance.new("ScreenGui");
+      reactRoot = ReactRoblox.createRoot(screenGui);
 
     end;
     afterEach = function()
