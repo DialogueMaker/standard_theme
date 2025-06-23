@@ -198,7 +198,7 @@ return {
     };
 
   end, {
-    beforeAll = function()
+    beforeEach = function()
     
       local newScreenGui = Instance.new("ScreenGui");
       screenGui = newScreenGui;
@@ -207,18 +207,15 @@ return {
     end;
     afterEach = function()
 
-      if reactRoot then
-
-        reactRoot:unmount();
-
-      end;
-
-    end;
-    afterAll = function()
-    
       if screenGui then
 
         screenGui:Destroy();
+
+      end;
+
+      if reactRoot then
+
+        reactRoot:unmount();
 
       end;
 
