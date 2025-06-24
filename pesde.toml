@@ -42,7 +42,7 @@ react-roblox = { wally = "jsdotlua/react-roblox", version = "^17.2.1" }
 react = { wally = "jsdotlua/react", version = "^17.2.1" }
 
 [dependencies]
-useDynamicSize = { name = "dialoguemaker/use_dynamic_size", version = "^0.1.0" }
+useDynamicSize = { name = "dialoguemaker/use_dynamic_size", version = "^0.1.2" }
 useKeybindContinue = { name = "dialoguemaker/use_keybind_continue", version = "^0.1.8" }
 useResponses = { name = "dialoguemaker/use_responses", version = "^0.1.5" }
 useTypewriter = { name = "dialoguemaker/use_typewriter", version = "^0.1.0" }

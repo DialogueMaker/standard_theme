@@ -62,17 +62,17 @@ react-roblox = [{ wally = "wally#jsdotlua/react-roblox", version = "^17.2.1", in
 rojo = [{ name = "pesde/rojo", version = "^7.4.4", index = "https://github.com/pesde-pkg/index", target = "lune" }, "dev"]
 scripts = [{ name = "pesde/scripts_rojo", version = "^0.1.0", index = "https://github.com/pesde-pkg/index", target = "lune" }, "dev"]
 
-[graph."dialoguemaker/use_dynamic_size@0.1.0 roblox"]
-direct = ["useDynamicSize", { name = "dialoguemaker/use_dynamic_size", version = "^0.1.0", index = "default" }, "standard"]
+[graph."dialoguemaker/use_dynamic_size@0.1.2 roblox"]
+direct = ["useDynamicSize", { name = "dialoguemaker/use_dynamic_size", version = "^0.1.2", index = "default" }, "standard"]
 
-[graph."dialoguemaker/use_dynamic_size@0.1.0 roblox".dependencies]
+[graph."dialoguemaker/use_dynamic_size@0.1.2 roblox".dependencies]
 react = ["wally#jsdotlua/react@17.2.1 roblox", "peer"]
 
-[graph."dialoguemaker/use_dynamic_size@0.1.0 roblox".pkg_ref]
+[graph."dialoguemaker/use_dynamic_size@0.1.2 roblox".pkg_ref]
 ref_ty = "pesde"
 index_url = "https://github.com/pesde-pkg/index"
 
-[graph."dialoguemaker/use_dynamic_size@0.1.0 roblox".pkg_ref.dependencies]
+[graph."dialoguemaker/use_dynamic_size@0.1.2 roblox".pkg_ref.dependencies]
 luau_lsp = [{ name = "pesde/luau_lsp", version = "^1.47.0", index = "https://github.com/pesde-pkg/index", target = "lune" }, "dev"]
 react = [{ wally = "wally#jsdotlua/react", version = "^17.2.1", index = "https://github.com/UpliftGames/wally-index" }, "peer"]
 rojo = [{ name = "pesde/rojo", version = "^7.4.4", index = "https://github.com/pesde-pkg/index", target = "lune" }, "dev"]
