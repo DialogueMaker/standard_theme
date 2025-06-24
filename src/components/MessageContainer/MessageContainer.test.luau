@@ -146,6 +146,9 @@ return {
         assert(messageContainer, "MessageContainer should be rendered");
         expect(messageContainer.Size.Y.Scale).toBe(1);
 
+        reactRoot:unmount();
+        billboardGui:Destroy();
+
       end);
 
       it("has a fixed height if the dialogue GUI is a ScreenGui", function()
