@@ -21,34 +21,103 @@ return {
 
   describe("MessageContainer", function()
 
+    local function createMockClient(dialogueGUI: GuiBase2d | GuiBase3d, shouldHaveChildren: boolean?)
+
+      local mockClient = {
+        dialogueGUI = dialogueGUI;
+        settings = {
+          keybinds = {};
+          typewriter = {
+            characterDelaySeconds = 0;
+          };
+        };
+        continueDialogueBindableFunction = Instance.new("BindableFunction");
+        continueDialogue = function(self)
+
+          self.continueDialogueBindableFunction:Invoke();
+        
+        end :: (self: Client) -> ();
+        dialogue = {
+          settings = {
+            speaker = {};
+            typewriter = {
+              characterDelaySeconds = 0;
+            };
+          } :: DialogueMakerTypes.DialogueSettings;
+          getContent = function()
+
+            return {};
+
+          end :: unknown;
+          getChildren = function()
+
+            if shouldHaveChildren then
+
+              return {
+                {
+                  type = "Message";
+                  verifyCondition = function() return true; end;
+                }
+              };
+
+            end;
+
+            return {};
+
+          end :: unknown;
+        };
+        conversation = {
+          settings = {
+            speaker = {};
+            typewriter = {
+              characterDelaySeconds = 0;
+            };
+          } :: DialogueMakerTypes.ConversationSettings;
+        };
+      } :: Client
+
+      return mockClient;
+
+    end;
+
     local function MockComponent(properties: any)
 
-      -- local isTypingFinished, setIsTypingFinished = React.useState(false);
-      -- local onRendered = properties.onRendered;
+      local isTypingFinished, setIsTypingFinished = React.useState(false);
+      local client = properties.client;
+      local onRendered = properties.onRendered;
+      local onTypingFinished = properties.onTypingFinished;
+      local onPageFinished = properties.onPageFinished or function() end;
 
-      -- React.useEffect(function()
+      React.useEffect(function()
       
-      --   if onRendered then
+        if onRendered then
 
-      --     onRendered();
+          onRendered();
 
-      --   end;
+        end;
 
-      -- end, {onRendered});
+      end, {onRendered});
 
-      -- React.useEffect(function()
+      React.useEffect(function()
 
-      --   if isTypingFinished then
+        if onTypingFinished and isTypingFinished then
 
-      --     properties.continueEvent:Fire();
+          onTypingFinished();
 
-      --   end;
+        end;
 
-      -- end, {isTypingFinished});
+      end, {onTypingFinished, isTypingFinished});
 
-      -- return React.createElement(MessageContainer, {
-
-      -- });
+      return React.createElement(MessageContainer, {
+        onPageFinished = onPageFinished;
+        onTypingFinished = function() 
+          
+          setIsTypingFinished(true);
+        
+        end;
+        isTypingFinished = isTypingFinished;
+        client = client;
+      });
 
     end;
 
@@ -56,31 +125,127 @@ return {
 
       it("has a full height if the dialogue GUI is not a ScreenGui", function()
 
-        error("Not implemented");
+        local billboardGui = Instance.new("BillboardGui");
+        local reactRoot = ReactRoblox.createRoot(billboardGui);
+
+        local continueEvent = Instance.new("BindableEvent");
+        local mockClient = createMockClient(billboardGui);
+        local element = React.createElement(MockComponent, {
+          client = mockClient;
+          onRendered = function()
+
+            continueEvent:Fire();
+
+          end;
+        });
+
+        reactRoot:render(element);
+        continueEvent.Event:Wait();
+
+        local messageContainer = billboardGui:FindFirstChildOfClass("Frame");
+        assert(messageContainer, "MessageContainer should be rendered");
+        expect(messageContainer.Size.Y.Scale).toBe(1);
 
       end);
 
       it("has a fixed height if the dialogue GUI is a ScreenGui", function()
 
-        error("Not implemented");
+        expect(function()
+
+          assert(screenGui, "ScreenGui should be initialized");
+          assert(reactRoot, "React root should be initialized");
+
+          local continueEvent = Instance.new("BindableEvent");
+          local mockClient = createMockClient(screenGui);
+          local element = React.createElement(MockComponent, {
+            client = mockClient;
+            onRendered = function()
+
+              continueEvent:Fire();
+
+            end;
+          });
+
+          reactRoot:render(element);
+          continueEvent.Event:Wait();
+
+          local messageContainer = screenGui:FindFirstChildOfClass("Frame");
+          assert(messageContainer, "MessageContainer should be rendered");
+          expect(messageContainer.Size ~= UDim2.fromScale(1, 1)).toBe(true);
+
+        end).toFinishBeforeSeconds(1);
 
       end);
 
       it("can continue the conversation with the Dialogue Maker Client API", function()
 
-        error("Not implemented");
+        expect(function()
+
+          assert(screenGui, "ScreenGui should be initialized");
+          assert(reactRoot, "React root should be initialized");
+
+          local continueEvent = Instance.new("BindableEvent");
+          local mockClient = createMockClient(screenGui);
+          local element = React.createElement(MockComponent, {
+            client = mockClient;
+            onPageFinished = function()
+
+              continueEvent:Fire();
+
+            end;
+            onTypingFinished = function()
+
+              mockClient:continueDialogue();
+
+            end;
+          });
+
+          reactRoot:render(element);
+          continueEvent.Event:Wait();
+
+        end).toFinishBeforeSeconds(1);
 
       end);
 
-      it("has an indicator to continue to the next page", function()
+      it("can have an indicator to continue to the next page", function()
 
-        error("Not implemented");
+        expect(function()
+
+          assert(screenGui, "ScreenGui should be initialized");
+          assert(reactRoot, "React root should be initialized");
+
+          local mockClient = createMockClient(screenGui, true);
+          local element = React.createElement(MockComponent, {
+            client = mockClient;
+          });
+
+          reactRoot:render(element);
+          local messageContainer = screenGui:WaitForChild("Frame", 1);
+          assert(messageContainer, "MessageContainer should be rendered");
+          expect(messageContainer:FindFirstChild("ContinueIndicator")).toExist();
+
+        end).toFinishBeforeSeconds(1);
 
       end);
 
       it("hides its next page indicator if there isn't a next page", function()
 
-        error("Not implemented");
+        expect(function()
+
+          assert(screenGui, "ScreenGui should be initialized");
+          assert(reactRoot, "React root should be initialized");
+
+          local mockClient = createMockClient(screenGui);
+          local element = React.createElement(MockComponent, {
+            client = mockClient;
+          });
+
+          reactRoot:render(element);
+          local messageContainer = screenGui:WaitForChild("Frame", 1);
+          assert(messageContainer, "MessageContainer should be rendered");
+          expect(messageContainer:FindFirstChild("ContinueIndicator")).toBeNil();
+
+        end).toFinishBeforeSeconds(1);
 
       end);
 
@@ -99,6 +264,29 @@ return {
 
     }
 
-  end);
+  end, {
+    beforeEach = function()
+    
+      local newScreenGui = Instance.new("ScreenGui");
+      screenGui = newScreenGui;
+      reactRoot = ReactRoblox.createRoot(newScreenGui);
+
+    end;
+    afterEach = function()
+
+      if reactRoot then
+
+        reactRoot:unmount();
+
+      end;
+
+      if screenGui then
+
+        screenGui:Destroy();
+
+      end;
+
+    end;
+  });
 
 };

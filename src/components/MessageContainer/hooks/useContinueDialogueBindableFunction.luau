@@ -10,7 +10,7 @@ type Client = DialogueMakerTypes.Client;
 local function useContinueDialogueBindableFunction(client: Client, continueDialogue: () -> ())
 
   React.useEffect(function()
-  
+
     client.continueDialogueBindableFunction.OnInvoke = continueDialogue;
 
     return function()
@@ -19,7 +19,7 @@ local function useContinueDialogueBindableFunction(client: Client, continueDialo
 
     end;
 
-  end, {client});
+  end, {client :: unknown, continueDialogue});
 
 end;
 
